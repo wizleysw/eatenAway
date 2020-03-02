@@ -1,0 +1,11 @@
+{% if user_info %}
+    <ul>
+        {% for user in user_info %}
+        <li>{{user.id}}</li>
+        <li>{{user.email}}</li>
+        <li>{{user.comment}}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No User.</p>
+{% endif %}
