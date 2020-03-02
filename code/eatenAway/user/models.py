@@ -29,4 +29,3 @@ class Account(models.Model):
         ('B', '정지'),
     )
     status = models.CharField(max_length=1, choices=account_status_selection)
-ㄱ
