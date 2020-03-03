@@ -1,0 +1,178 @@
+<!DOCTYPE HTML>
+{% load static %}
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+	<title>회원가입</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+	<link rel="stylesheet" href="{% static 'css/main.css' %}"/>
+	<noscript>
+		<link rel="stylesheet" href="{% static 'css/noscript.css' %}"/>
+	</noscript>
+</head>
+<body class="is-preload">
+<script src='https://www.google.com/recaptcha/api.js' async defer></script>
+<script>
+	var check = function() {
+	  if (document.getElementById('password').value == document.getElementById('password2').value) {
+			document.getElementById('message').style.color = 'green';
+			document.getElementById('message').innerHTML = '패스워드가 일치합니다.';
+	  } else {
+		document.getElementById('message').style.color = 'red';
+		document.getElementById('message').innerHTML = '패스워드가 올바르지 않습니다.';
+	  }
+	}
+
+	function checkRecap(){
+		var v = grecaptcha.getResponse();
+		if(v.length==0){
+			alert('로봇이 아닌지 판단하기 위한 캡차를 진행해주시기 바랍니다.');
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
+</script>
+<!-- Wrapper -->
+<div id="wrapper" class="divided">
+
+	<!-- Spotlight -->
+	<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
+		<div class="content">
+			<h2>회원가입</h2>
+			<p>eaten-Away 서비스가 제공하는 풍부한 경험의 혜택을 마음껏 누리세요.<br>
+				그 전에 당신에 대해서 알 수 있도록 회원가입을 해주세요.</p>
+		</div>
+		<div class="image">
+			<img src="{% static 'images/user/signup/signup0.png' %}" alt=""/>
+		</div>
+	</section>
+
+	<!-- Additional Elements -->
+	<section class="wrapper style1 align-center">
+		<div class="inner">
+			<div class="index align-left">
+
+
+				<!-- Form -->
+				<section>
+					<header>
+					</header>
+					<div class="content">
+
+						<form id="register" action="?" onsubmit="checkRecap();" method="POST">
+							{% csrf_token %}
+							<div class="fields">
+								<div class="field half">
+									<label for="id">아이디</label>
+									<input type="text" name="id" id="id" value="" required/>
+								</div>
+								<div class="field half">
+									<label>.</label>
+									<ul class="actions small">
+										<li><a href="#" class="button small">사용가능여부</a></li>
+									</ul>
+								</div>
+								<div class="field half">
+									<label for="password">패스워드</label>
+									<input type="password" name="password" id="password" value="" required/>
+								</div>
+								<div class="field half">
+									<label for="password2">패스워드 확인</label>
+									<input type="password" name="password2" id="password2" value="" onkeyup='check();' required/>
+								</div>
+								<div class="field">
+									<span id='message'></span>
+								</div>
+
+								<div class="field half">
+									<label for="email">이메일</label>
+									<input type="email" name="email" id="email" value="" required/>
+								</div>
+								<div class="field half">
+									<label>.</label>
+									<ul class="actions small">
+										<li><a href="#" class="button small">사용가능여부</a></li>
+									</ul>
+								</div>
+
+								<div class="field">
+									<label for="name">이름</label>
+									<input type="text" name="name" id="name" value="" required/>
+								</div>
+								<div class="field third">
+									<!--                                    <label for="email">Email</label>-->
+									<label for="birth">생일</label>
+									<input type="date" name="birth" id="birth" value="" required/>
+									<!--                                    <input type="email" name="email" id="email" value=""/>-->
+								</div>
+								<div class="field third">
+									<label for="sex">성별</label>
+									<input type="radio" id="man" name="sex" value="M"/>
+									<label for="man">남자</label>
+								</div>
+								<div class="field third">
+									<label for="sex">.</label>
+									<input type="radio" id="woman" name="sex" value="W" checked/>
+									<label for="woman">여자</label>
+								</div>
+								<div class="field">
+									<label for="area">사는 곳</label>
+									<select name="area" id="area" required>
+										<option value="">- 선택하세요 -</option>
+										<option value="서울">서울</option>
+										<option value="금호">금호</option>
+										<option value="군자">군자</option>
+									</select>
+								</div>
+
+								<div class="field half">
+    								<div class="g-recaptcha" data-sitekey="6LfAWt4UAAAAAKlHWgt3MN0YwvNQNgnrA_lUdbOR"></div>
+								</div>
+							</div>
+							<ul class="actions">
+								<li><button class="g-recaptcha" button type="submit"/>회원가입</li>
+							</ul>
+						</form>
+
+					</div>
+				</section>
+
+
+			</div>
+		</div>
+	</section>
+
+	<!-- Footer -->
+	<footer class="wrapper style1 align-center">
+		<div class="inner">
+			<ul class="icons">
+				<li><a href="#" class="icon brands style2 fa-twitter"><span class="label">Twitter</span></a></li>
+				<li><a href="#" class="icon brands style2 fa-facebook-f"><span class="label">Facebook</span></a></li>
+				<li><a href="#" class="icon brands style2 fa-instagram"><span class="label">Instagram</span></a></li>
+				<li><a href="#" class="icon brands style2 fa-linkedin"><span class="label">LinkedIn</span></a></li>
+				<li><a href="#" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+			</ul>
+			<p>&copy; Copyright © 2020 <a href="https://github.com/wizleysw">Wizley</a>. All rights reserved.</p>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery.scrollex.min.js' %}"></script>
+<script src="{% static 'js/jquery.scrolly.min.js' %}"></script>
+<script src="{% static 'js/browser.min.js' %}"></script>
+<script src="{% static 'js/breakpoints.min.js' %}"></script>
+<script src="{% static 'js/util.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+</body>
+</html>

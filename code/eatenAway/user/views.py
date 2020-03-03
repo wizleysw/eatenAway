@@ -8,5 +8,7 @@ def index(request):
 
 def getuser(request):
     account_info = Account.objects.order_by('account_no')
-    user_info = User.objects.filter(id=account_info[0].user_info_id)
     return render(request, 'index.html',{'user_info' : account_info})
+
+def signup(request):
+    return render(request, 'signup.html', {})
