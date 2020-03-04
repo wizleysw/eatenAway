@@ -17,7 +17,9 @@
 </head>
 <body class="is-preload">
 <script src='https://www.google.com/recaptcha/api.js' async defer></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
+	var regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
 	var check = function() {
 	  if (document.getElementById('password').value == document.getElementById('password2').value) {
 			document.getElementById('message').style.color = 'green';
@@ -46,7 +48,7 @@
 		}
 		else{
 			xhr = new XMLHttpRequest();
-			link = 'http://localhost:8000/user/api/check/username/' + id;
+			link = 'http://localhost:8000/api/username/' + id;
 			xhr.open('GET', link, false);
 			xhr.send();
 			var content = xhr.responseText;
@@ -56,10 +58,9 @@
 
 	function checkEmail(){
 		email = document.getElementById('email').value;
-		var regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
     	if (regExp.test(email)){
 			xhr = new XMLHttpRequest();
-			link = 'http://localhost:8000/user/api/check/email/' + email;
+			link = 'http://localhost:8000/api/email/' + email;
 			xhr.open('GET', link, false);
 			xhr.send();
 			var content = xhr.responseText;
@@ -68,6 +69,52 @@
 		else{
 			alert('잘못된 이메일 형식입니다');
 		};
+	}
+
+	function lastCheck(){
+		id = document.getElementById('username').value;
+		if(id.length<1){
+			alert('아이디를 다시 확인해주세요.');
+			return false;
+		}
+
+		if(document.getElementById('password').value != document.getElementById('password2').value){
+			alert('패스워드를 다시 확인해주세요.');
+			return false;
+		}
+
+		if(document.getElementById('password').value.length < 8){
+			alert('패스워드 최소길이는 8글자입니다.');
+			return false;
+		}
+
+		email = document.getElementById('email').value;
+		if(!(regExp.test(email))){
+			alert('이메일을 다시 확인해주세요.');
+			return false;
+		}
+
+		if(!checkRecap()){
+			return false;
+		}
+
+		var queryString = $("form[name=registerForm]").serialize();
+
+		$.ajax({
+    	type: 'POST',
+    	url: 'http://localhost:8000/api/account/',
+    	data : queryString,
+    	dataType : 'json',
+    	error: function(xhr, status, error){
+    		return false;
+    	},
+    	success: function(json){
+    		alert(json);
+    		return true;
+    	},
+		});
+
+		return false;
 	}
 
 </script>
@@ -98,7 +145,7 @@
 					</header>
 					<div class="content">
 
-						<form id="register" action="?" onsubmit="checkRecap();" method="POST">
+						<form id="registerForm" name="registerForm" action="/user/emailverify/" onsubmit="return lastCheck();" method="POST">
 							{% csrf_token %}
 							<div class="fields">
 								<div class="field half">
