@@ -13,7 +13,7 @@ class Account(models.Model):
     )
     sex = models.CharField(max_length=1, choices=sex_selection, default='W')
 
-    id = models.CharField(max_length=10, verbose_name='ID')
+    username = models.CharField(max_length=10, verbose_name='아이디')
     password = forms.CharField(max_length=16, widget=forms.PasswordInput)
     email = models.EmailField(max_length=32, verbose_name='이메일')
     created_date = models.DateTimeField(auto_now_add=True, verbose_name="가입날짜")

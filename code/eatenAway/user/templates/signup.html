@@ -38,6 +38,38 @@
 			return true;
 		}
 	}
+
+	function checkUsername(){
+		id = document.getElementById('username').value;
+		if(id.length<1){
+			alert('아이디를 입력하세요.');
+		}
+		else{
+			xhr = new XMLHttpRequest();
+			link = 'http://localhost:8000/user/api/check/username/' + id;
+			xhr.open('GET', link, false);
+			xhr.send();
+			var content = xhr.responseText;
+			alert(content);
+		}
+	}
+
+	function checkEmail(){
+		email = document.getElementById('email').value;
+		var regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+    	if (regExp.test(email)){
+			xhr = new XMLHttpRequest();
+			link = 'http://localhost:8000/user/api/check/email/' + email;
+			xhr.open('GET', link, false);
+			xhr.send();
+			var content = xhr.responseText;
+			alert(content);
+		}
+		else{
+			alert('잘못된 이메일 형식입니다');
+		};
+	}
+
 </script>
 <!-- Wrapper -->
 <div id="wrapper" class="divided">
@@ -50,7 +82,7 @@
 				그 전에 당신에 대해서 알 수 있도록 회원가입을 해주세요.</p>
 		</div>
 		<div class="image">
-			<img src="{% static 'images/user/signup/signup0.png' %}" alt=""/>
+			<a href="/index"><img src="{% static 'images/user/signup/signup0.png' %}" alt=""/></a>
 		</div>
 	</section>
 
@@ -70,13 +102,13 @@
 							{% csrf_token %}
 							<div class="fields">
 								<div class="field half">
-									<label for="id">아이디</label>
-									<input type="text" name="id" id="id" value="" required/>
+									<label for="username">아이디</label>
+									<input type="text" name="username" id="username" value="" required/>
 								</div>
 								<div class="field half">
-									<label>.</label>
+									<label style="color:white">.</label>
 									<ul class="actions small">
-										<li><a href="#" class="button small">사용가능여부</a></li>
+										<li><button type="button" onclick="checkUsername();" class="button small" >사용가능여부</button></li>
 									</ul>
 								</div>
 								<div class="field half">
@@ -96,9 +128,9 @@
 									<input type="email" name="email" id="email" value="" required/>
 								</div>
 								<div class="field half">
-									<label>.</label>
+									<label style="color:white">.</label>
 									<ul class="actions small">
-										<li><a href="#" class="button small">사용가능여부</a></li>
+										<li><button type="button" onclick="checkEmail();" class="button small" >사용가능여부</button></li>
 									</ul>
 								</div>
 
@@ -118,7 +150,7 @@
 									<label for="man">남자</label>
 								</div>
 								<div class="field third">
-									<label for="sex">.</label>
+									<label style="color:white">.</label>
 									<input type="radio" id="woman" name="sex" value="W" checked/>
 									<label for="woman">여자</label>
 								</div>
