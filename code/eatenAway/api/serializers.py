@@ -24,4 +24,3 @@ class AccountSerializer(serializers.ModelSerializer):
         if len(value) < 8:
             raise serializers.ValidationError("패스워드는 최소 %s자 이상이어야 합니다." % 8)
         return value
-

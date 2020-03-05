@@ -14,38 +14,39 @@ class AccountList(APIView):
         serializer = AccountSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    def post(self, request):
+        email = request.data['email']
+        print('DEBUG email : ', email)
 
 """
-id 중복 검사 
-/user/api/check/id/<str:id>/
+id 중복 검사 : 
+GET /api/account/verify/<str:id>/
+
+email 중복 검사 : 
+POST /api/account/verify/
 """
-class is_username_exist(APIView):
-    def get_object(self, username):
+class verifyExistence(APIView):
+    def getObject_with_username(self, username):
         try:
             return Account.objects.get(username=username)
         except Account.DoesNotExist:
             return "OK"
 
-    def get(self, request, username):
-        ac = self.get_object(username)
-        if ac == "OK":
-            return Response("사용가능한 아이디입니다.")
-        return AccountSerializer(ac).validate_username(username)
-
-
-"""
-email 중복 검사 
-/user/api/check/username/<str:username>/
-"""
-class is_email_exist(APIView):
-    def get_object(self, email):
+    def getObject_with_email(self, email):
         try:
             return Account.objects.get(email=email)
         except Account.DoesNotExist:
             return "OK"
 
-    def get(self, request, email):
-        ac = self.get_object(email)
+    def get(self, request, username):
+        ac = self.getObject_with_username(username)
+        if ac == "OK":
+            return Response("사용가능한 아이디입니다.")
+        return AccountSerializer(ac).validate_username(username)
+
+    def post(self, request):
+        email = request.data['email']
+        ac = self.getObject_with_email(email)
         if ac == "OK":
             return Response("사용가능한 이메일입니다.")
         return AccountSerializer(ac).validate_email(email)
