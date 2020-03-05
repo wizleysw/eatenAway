@@ -7,10 +7,11 @@ class AccountForm(forms.ModelForm):
     birth = forms.DateField(label="birth", required=True)
     area = forms.CharField(label="area", max_length=10, required=True)
     sex = forms.CharField(label="sex", max_length=1, required=True)
-    username = forms.CharField(label="username", max_length=10, min_length=4)
-    password = forms.CharField(max_length=16, required=True)
+    username = forms.CharField(label="username", max_length=10, min_length=4, required=True)
+    password = forms.CharField(max_length=16, min_length=8, required=True)
     email = forms.EmailField(label="email", max_length=32, required=True)
 
     class Meta:
         model = Account
-        exclude = ('created_date', 'comment', 'status')
+        exclude = ('comment', 'created_date', 'status', 'profile')
+

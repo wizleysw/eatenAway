@@ -22,7 +22,6 @@ secret_file = os.path.join(BASE_DIR, 'eatenAway/secret.json')
 with open(secret_file) as f:
     secret = json.loads(f.read())
 
-
 def get_secretKey(setting, secret=secret):
     try:
         return secret[setting]
@@ -33,6 +32,10 @@ def get_secretKey(setting, secret=secret):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secretKey("SECRET_KEY")
+
+# Google Recaptcha
+
+GOOGLE_RECAPTCHA_SECRET_KEY = get_secretKey("GOOGLE_RECAPTCHA_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -58,6 +61,8 @@ INSTALLED_APPS = [
     'user',
     'api',
 ]
+
+SITE_ID=2
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -35,7 +35,7 @@ function checkUsername(){
     	        alert("이미 사용중인 아이디입니다.");
     		    return false;
     	    },
-    	    success: function(xhr){
+    	    success: function(xhr, status){
     	        alert("사용가능한 아이디입니다.");
         		return true;
         	},
@@ -59,7 +59,7 @@ function checkEmail(){
     		    return false;
     	    },
     	    success: function(xhr){
-        		alert("사용가능한 이메일입니다.");
+        		alert("사용 가능한 이메일입니다.");
         		return true;
         	},
 	    });
@@ -96,20 +96,29 @@ function lastCheck(){
 		return false;
 	}
 
-	var queryString = $("form[name=registerForm]").serialize();
-	$.ajax({
-    	type: 'POST',
-    	url: 'http://localhost:8000/api/accounts/',
-    	data : queryString,
-    	dataType : 'json',
-    	error: function(xhr, status, error){
-    		return false;
-    	},
-    	success: function(json){
-    		alert(json);
-    		return true;
-    	},
-	});
+    function tryRes(){
+	    var queryString = $("form[name=registerForm]").serialize();
 
-	return false;
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:8000/api/accounts/',
+            data : queryString,
+            dataType : 'json',
+            async: false,
+            error: function(xhr, status, error){
+                alert('정보를 다시 확인해주세요.');
+                grecaptcha.reset();
+                flag = false;
+            },
+            success: function(xhr){
+                alert('회원가입 신청이 완료되었습니다.');
+                flag = true;
+            },
+        });
+
+        return flag;
+       }
+
+       var res = tryRes();
+       return res;
 }

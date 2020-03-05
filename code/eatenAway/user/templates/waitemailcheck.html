@@ -27,11 +27,11 @@
     <section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
         <div class="content">
             <h2>회원가입</h2>
-            <p>eaten-Away 서비스가 제공하는 풍부한 경험의 혜택을 마음껏 누리세요.<br>
-                그 전에 당신에 대해서 알 수 있도록 회원가입을 해주세요.</p>
+            <p>{{ username }} 님, 이제 딱 한 단계만이 남았습니다.<br>
+                본인인지 여부를 확인하기 위하여 이메일을 확인하여 인증을 완료해주세요.</p>
         </div>
         <div class="image">
-            <a href="/index"><img src="{% static 'images/user/signup/signup0.png' %}" alt=""/></a>
+            <a href="/index"><img src="{% static 'images/user/signup/signup3.png' %}" alt=""/></a>
         </div>
     </section>
 
@@ -40,7 +40,20 @@
         <div class="inner">
             <div class="index align-left">
 
+                <!-- Box -->
+                <section>
+                    <div class="content">
 
+                        <div class="box">
+                            <p>{{ email }} 로 인증번호가 발송되었습니다.<br></p>
+                            <input type="text" name="emailvalue" id="emailvalue" placeholder="인증번호를 입력하세요." /><br>
+                            <ul class="actions">
+                                <li><a href="#" class="button primary">확인</a></li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </section>
 
             </div>
     </section>
