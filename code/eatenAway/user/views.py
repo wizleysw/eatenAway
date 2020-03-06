@@ -14,14 +14,11 @@ def signup(request):
 
 def waitemailcheck(request):
     try:
-        # form_data = AccountForm(request.data)
-        #
-        # username = form_data.cleaned_data['username']
-        # email = form_data.cleaned_data['email']
-        username = 'abc'
-        email = 'example@example.com'
-        return render(request, 'waitemailcheck.html', {'username':username, 'email':email})
+        if(request.method == 'POST'):
+            username = request.POST['username']
+            email = request.POST['email']
+            return render(request, 'waitemailcheck.html', {'username': username, 'email': email})
+        else:
+            return redirect('/user/signup/')
     except:
-        pass
-    # except:
-    #     return redirect('/user/signup/')
+        return redirect('/user/signup/')

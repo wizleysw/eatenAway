@@ -1,6 +1,6 @@
 import urllib
 import json
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
 from user.forms import AccountForm
 from django.http import Http404
 from rest_framework.response import Response
@@ -8,6 +8,13 @@ from rest_framework.views import APIView
 from .serializers import AccountSerializer
 from user.models import Account
 from eatenAway.settings import GOOGLE_RECAPTCHA_SECRET_KEY
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from .tokens import account_activation_token
+from django.core.mail import EmailMessage
+from django.utils.encoding import force_bytes, force_text
+from rest_framework import permissions
+from django.shortcuts import render
 
 
 def checkRecaptcha(recaptcha_response):
@@ -32,6 +39,8 @@ def checkRecaptcha(recaptcha_response):
 POST /api/accounts/
 
 """
+
+
 class AccountList(APIView):
     def get(self, request):
         return Response('HelloWorld')
@@ -55,10 +64,25 @@ class AccountList(APIView):
             new_account = form_data.save(commit=False)
             new_account.set_password(form_data.cleaned_data['password'])
             new_account.save()
+
+            user = Account.objects.get(username=form_data.cleaned_data['username'])
+            message = render_to_string('activate.html', {
+                'domain': 'localhost:8000',
+                'username': form_data.cleaned_data['username'],
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user)
+            })
+
+            mail_subject = 'eaten-Away 이메일 인증'
+            to_email = form_data.cleaned_data['email']
+            email = EmailMessage(mail_subject, message, to=[to_email])
+            email.send()
+
             return Response('success.', status=HTTP_201_CREATED)
 
         else:
             return Response('fail.', status=HTTP_400_BAD_REQUEST)
+
 
 """
 id 중복 검사 : 
@@ -67,6 +91,8 @@ GET /api/accounts/verify/<str:id>/
 email 중복 검사 : 
 POST /api/accounts/verify/
 """
+
+
 class verifyExistence(APIView):
     def getObject_with_username(self, username):
         try:
@@ -90,7 +116,6 @@ class verifyExistence(APIView):
             else:
                 return Http404
 
-
     def post(self, request):
         email = request.data['email']
         ac = self.getObject_with_email(email)
@@ -100,3 +125,24 @@ class verifyExistence(APIView):
             return Response("사용가능한 이메입니다.")
         else:
             return Http404
+
+
+class EmailActivate(APIView):
+    permission_classes = (permissions.AllowAny, )
+
+    def get(self, request, uidb64, token):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = Account.objects.get(pk=uid)
+        except:
+            user = None
+        try:
+            if user is not None and account_activation_token.check_token(user, token):
+                user.status = 'O'
+                user.active = True
+                user.save()
+                return render(request, 'emailverifysuccess.html', {'result':True})
+            else:
+                return render(request, 'emailverifysuccess.html', {'result':False})
+        except:
+            return render(request, 'emailverifysuccess.html', {'result':False})

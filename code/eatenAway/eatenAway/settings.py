@@ -37,6 +37,17 @@ SECRET_KEY = get_secretKey("SECRET_KEY")
 
 GOOGLE_RECAPTCHA_SECRET_KEY = get_secretKey("GOOGLE_RECAPTCHA_SECRET_KEY")
 
+
+# Google SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = get_secretKey("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = get_secretKey("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+SERVER_EMAIL = get_secretKey("EMAIL_HOST_USER")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

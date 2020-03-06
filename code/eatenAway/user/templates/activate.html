@@ -1,0 +1,6 @@
+{% load static %}
+{% load i18n %}
+{% blocktrans %}
+{{ username }} 님, 아래의 링크를 클릭하여 회원가입을 완료해주세요.
+{% endblocktrans %}
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}

@@ -13,5 +13,5 @@ class AccountForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        exclude = ('comment', 'created_date', 'status', 'profile')
+        exclude = ('comment', 'created_date', 'status', 'profile', 'active')
 

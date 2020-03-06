@@ -27,11 +27,11 @@
     <section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
         <div class="content">
             <h2>회원가입</h2>
-            <p>{{ username }} 님, 이제 딱 한 단계만이 남았습니다.<br>
-                본인인지 여부를 확인하기 위하여 이메일을 확인하여 인증을 완료해주세요.</p>
+            <p><br>
+                </p>
         </div>
         <div class="image">
-            <a href="/index"><img src="{% static 'images/user/signup/signup3.png' %}" alt=""/></a>
+            <a href="/index"><img src="{% static 'images/user/signup/signup2.png' %}" alt=""/></a>
         </div>
     </section>
 
@@ -45,11 +45,15 @@
                     <div class="content">
 
                         <div class="box">
-                            <p>{{ email }} 로 링크가 발송되었습니다.<br>
-                            이메일을 인증을 마친 후 정상적으로 로그인이 가능합니다.<br></p>
-
+                            {% if result %}
+                            <p>이메일 인증이 정상적으로 완료되었습니다.<br>
+                            이제 창을 닫으셔도 됩니다.<br></p>
+                            {% else %}
+                            <p>인증에 실패하였습니다.<br>
+                            잠시 후 다시 시도해주시기 바랍니다.</p>
+                            {% endif %}
                             <ul class="actions">
-                                <li><a href="#" class="button">확인</a></li>
+                                <li><input type="button" class="button" onClick="self.close()" value="닫기"></input></li>
                             </ul>
                         </div>
 
