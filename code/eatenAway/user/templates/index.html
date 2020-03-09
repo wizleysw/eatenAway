@@ -1,11 +1,92 @@
-{% if user_info %}
-    <ul>
-        {% for user in user_info %}
-        <li>{{user.id}}</li>
-        <li>{{user.email}}</li>
-        <li>{{user.comment}}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No User.</p>
-{% endif %}
+<!DOCTYPE HTML>
+{% load static %}
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+    <title>eaten-Away</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}"/>
+    <noscript>
+        <link rel="stylesheet" href="{% static 'css/noscript.css' %}"/>
+    </noscript>
+</head>
+<body class="is-preload">
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Story by HTML5 UP</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="assets/css/main.css"/>
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css"/>
+    </noscript>
+</head>
+<body class="is-preload">
+
+<!-- Wrapper -->
+<div id="wrapper" class="divided">
+
+    <!-- Banner -->
+    <section
+            class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
+        <div class="content">
+            <h1>eaten-Away</h1>
+            <p class="major">지금 이순간 당신은 식사를 하셨을까요?
+            </p>
+            <p>어제의 점심메뉴는 무엇이었나요?<br> 저번주 화요일 저녁은요?<br>
+                지금 당장 뭘 먹을지 모르시겠나요?<br><br>
+                그렇다면 잘 찾아오셨습니다. 저희가 당신을 위해 많은 것들을 준비했어요.
+            <ul class="actions stacked">
+                <li><a href="/user/login/" class="button large wide smooth-scroll-middle">입장하기</a></li>
+            </ul>
+        </div>
+        <div class="image">
+            <img src="{% static 'images/user/index/main.jpeg' %}" alt=""/>
+        </div>
+    </section>
+
+    <!-- Additional Elements -->
+    <section class="wrapper style1 align-center">
+        <div class="inner">
+            <h2>Serviced by Wizley.</h2>
+            <p>오늘의 나를 단단하게 만드는 것은 어제의 나이다.</p>
+            <div class="index align-left">
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="wrapper style1 align-center">
+        <div class="inner">
+            <ul class="icons">
+                <li><a href="#" class="icon brands style2 fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands style2 fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands style2 fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands style2 fa-linkedin"><span class="label">LinkedIn</span></a></li>
+                <li><a href="#" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+            </ul>
+            <p>&copy; Copyright © 2020 <a href="https://github.com/wizleysw">Wizley</a>. All rights reserved.</p>
+        </div>
+    </footer>
+
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery.scrollex.min.js' %}"></script>
+<script src="{% static 'js/jquery.scrolly.min.js' %}"></script>
+<script src="{% static 'js/browser.min.js' %}"></script>
+<script src="{% static 'js/breakpoints.min.js' %}"></script>
+<script src="{% static 'js/util.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+</body>
+</html>

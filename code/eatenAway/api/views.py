@@ -1,7 +1,7 @@
 import urllib
 import json
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
-from user.forms import AccountForm
+from user.forms import AccountForm, AccountLoginForm
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,7 +15,13 @@ from django.core.mail import EmailMessage
 from django.utils.encoding import force_bytes, force_text
 from rest_framework import permissions
 from django.shortcuts import render
-
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import authenticate
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
+import datetime
 
 def checkRecaptcha(recaptcha_response):
     url = 'https://www.google.com/recaptcha/api/siteverify'
@@ -33,14 +39,16 @@ def checkRecaptcha(recaptcha_response):
 
     return True
 
+class TokenFactory():
+    def createToken(self, username):
+        AccountInfo = Account.objects.get(username=username)
+
 
 """
 회원가입 폼 검증 및 등록:
 POST /api/accounts/
 
 """
-
-
 class AccountList(APIView):
     def get(self, request):
         return Response('HelloWorld')
@@ -52,7 +60,7 @@ class AccountList(APIView):
             return Response("fail.", status=HTTP_400_BAD_REQUEST)
 
         if form_data.is_valid():
-            cl = verifyExistence();
+            cl = verifyExistence()
             ac = verifyExistence.getObject_with_username(cl, form_data.cleaned_data['username'])
             if not AccountSerializer(ac).validate_username(form_data.cleaned_data['username']):
                 return Response('fail.', status=HTTP_400_BAD_REQUEST)
@@ -146,3 +154,38 @@ class EmailActivate(APIView):
                 return render(request, 'emailverifysuccess.html', {'result':False})
         except:
             return render(request, 'emailverifysuccess.html', {'result':False})
+
+
+"""
+post : login
+delete : logout
+"""
+class AccountAuthentication(APIView):
+    def authenticateAccount(self, username, password):
+        try:
+            AccountInfo = Account.objects.get(username=username)
+
+            if check_password(password, AccountInfo.password):
+                return True
+            else:
+                return False
+        except:
+            return False
+
+    def post(self, request):
+        form_data = AccountLoginForm(request.data)
+
+        if not checkRecaptcha(request.data['g-recaptcha-response']):
+            return Response("failed", status=HTTP_400_BAD_REQUEST)
+
+        if form_data.is_valid():
+            username = form_data.cleaned_data['username']
+            password = form_data.cleaned_data['password']
+            if self.authenticateAccount(username=username, password=password):
+                token_factory = TokenFactory()
+                token_key = token_factory.createToken(username)
+                return Response({'token': token_key}, status=HTTP_200_OK)
+            else:
+                return Response('fail.', status=HTTP_400_BAD_REQUEST)
+
+        return Response('failed', status=HTTP_400_BAD_REQUEST)

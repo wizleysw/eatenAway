@@ -1,0 +1,117 @@
+<!DOCTYPE HTML>
+{% load static %}
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+    <title>로그인</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}"/>
+    <noscript>
+        <link rel="stylesheet" href="{% static 'css/noscript.css' %}"/>
+    </noscript>
+</head>
+<body class="is-preload">
+<script src='https://www.google.com/recaptcha/api.js' async defer></script>
+<script>
+
+</script>
+<!-- Wrapper -->
+<div id="wrapper" class="divided">
+
+    <!-- Spotlight -->
+    <section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
+        <div class="content">
+            <h2>로그인</h2>
+            <p>오늘도 환영합니다!<br>
+            어서 저희와 함께 보람찬 하루를 계획하고 만들어보아요.</p>
+        </div>
+        <div class="image">
+            <a href="/index"><img src="{% static 'images/user/index/login.png' %}" alt=""/></a>
+        </div>
+    </section>
+
+    <!-- Additional Elements -->
+    <section class="wrapper style1 align-center">
+        <div class="inner">
+            <div class="index align-left">
+
+                <!-- Box -->
+                <section>
+                    <div class="content">
+
+                        <div class="box">
+                          <!-- Form -->
+				<section>
+					<header>
+					</header>
+					<div class="content">
+
+						<form id="loginForm" name="loginForm" action="/user/login/" onsubmit="" method="POST">
+							{% csrf_token %}
+							<div class="fields">
+								<div class="field">
+									<label for="username">아이디</label>
+									<input type="text" name="username" id="username" value="" required/>
+								</div>
+								<div class="field">
+									<label for="password">패스워드</label>
+									<input type="password" name="password" id="password" value="" required/>
+								</div>
+
+								<div class="field half">
+    								<div class="g-recaptcha" data-sitekey="6Lfr894UAAAAADK7kJWFY_3dSuKgBeGRP5yMDUnj"></div>
+								</div>
+							</div>
+							<ul class="actions">
+								<li><button class="g-recaptcha" button type="submit"/>로그인</li>
+							</ul>
+						</form>
+                        회원이 아니신가요 ?<br><br><a href="/user/signup/"><button>회원가입</button></a>
+
+					</div>
+				</section>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+    </section>
+
+
+</div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="wrapper style1 align-center">
+    <div class="inner">
+        <ul class="icons">
+            <li><a href="#" class="icon brands style2 fa-twitter"><span class="label">Twitter</span></a></li>
+            <li><a href="#" class="icon brands style2 fa-facebook-f"><span class="label">Facebook</span></a></li>
+            <li><a href="#" class="icon brands style2 fa-instagram"><span class="label">Instagram</span></a></li>
+            <li><a href="#" class="icon brands style2 fa-linkedin"><span class="label">LinkedIn</span></a></li>
+            <li><a href="#" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+        </ul>
+        <p>&copy; Copyright © 2020 <a href="https://github.com/wizleysw">Wizley</a>. All rights reserved.</p>
+    </div>
+</footer>
+
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery.scrollex.min.js' %}"></script>
+<script src="{% static 'js/jquery.scrolly.min.js' %}"></script>
+<script src="{% static 'js/browser.min.js' %}"></script>
+<script src="{% static 'js/breakpoints.min.js' %}"></script>
+<script src="{% static 'js/util.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+</body>
+</html>

@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from user.models import Account
 
-
 class AccountSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
 
@@ -16,7 +15,7 @@ class AccountSerializer(serializers.ModelSerializer):
         else:
             return True
 
-    def validate_email(selfself, value):
+    def validate_email(self, value):
         if Account.objects.filter(email=value).exists():
             return False
         else:
@@ -26,3 +25,13 @@ class AccountSerializer(serializers.ModelSerializer):
         if len(value) < 8:
            return False
         return True
+
+class LoginSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = ('username', 'password')
+
+        def validate_account(self, value):
+            pass
+
