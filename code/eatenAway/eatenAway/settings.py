@@ -11,7 +11,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os, json
+import datetime
 from django.core.exceptions import ImproperlyConfigured
+
+# USER MODEL
+AUTH_USER_MODEL = 'user.Account'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,6 +41,14 @@ SECRET_KEY = get_secretKey("SECRET_KEY")
 
 GOOGLE_RECAPTCHA_SECRET_KEY = get_secretKey("GOOGLE_RECAPTCHA_SECRET_KEY")
 
+# JWT
+JWT_AUTH={
+    'JWT_SECRET_KEY': get_secretKey("JWT_SECRET"),
+    'JWT_ALGORITHM': 'HS256',
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=28),
+}
 
 # Google SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -71,6 +83,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     'user',
     'api',
+    'rest_framework_jwt',
 ]
 
 SITE_ID=2
@@ -149,7 +162,15 @@ STATICFILES_DIRS = (
 )
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-    )
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
 }

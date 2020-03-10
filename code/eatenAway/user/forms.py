@@ -14,12 +14,3 @@ class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
         exclude = ('comment', 'created_date', 'status', 'profile', 'active')
-
-
-class AccountLoginForm(forms.ModelForm):
-    username = forms.CharField(max_length=10, min_length=4, required=True)
-    password = forms.CharField(max_length=16, min_length=8, required=True)
-
-    class Meta:
-        model = Account
-        exclude = ('name', 'birth', 'area', 'sex', 'email', 'comment', 'created_date', 'status', 'profile', 'active')

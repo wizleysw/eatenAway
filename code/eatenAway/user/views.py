@@ -16,11 +16,10 @@ def login(request):
     if(request.method == 'POST'):
         username = request.POST['username']
         password = request.POST['password']
-        csrfmiddlewaretoken = request.POST['csrfmiddlewaretoken']
         recaptcha = request.POST['g-recaptcha-response']
 
         url = "http://localhost:8000/api/accounts/login/"
-        r = requests.post(url, data={'username': username, 'password': password, 'csrfmiddlewaretoken': csrfmiddlewaretoken, 'g-recaptcha-response': recaptcha})
+        r = requests.post(url, data={'username': username, 'password': password, 'g-recaptcha-response': recaptcha})
         print('LOGIN : ', r.status_code)
         print('LOGIN : ', r.text)
 
@@ -28,8 +27,10 @@ def login(request):
     else:
         return render(request, 'login.html', {})
 
+
 def signup(request):
     return render(request, 'signup.html', {})
+
 
 def waitemailcheck(request):
     try:

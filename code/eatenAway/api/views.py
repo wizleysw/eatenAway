@@ -1,7 +1,9 @@
 import urllib
 import json
+
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
-from user.forms import AccountForm, AccountLoginForm
+from user.forms import AccountForm
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,12 +18,13 @@ from django.utils.encoding import force_bytes, force_text
 from rest_framework import permissions
 from django.shortcuts import render
 from django.contrib.auth.hashers import check_password
-from django.contrib.auth import authenticate
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated
-from django.utils import timezone
-import datetime
+import requests
+import time
+import jwt
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
 
 def checkRecaptcha(recaptcha_response):
     url = 'https://www.google.com/recaptcha/api/siteverify'
@@ -38,10 +41,6 @@ def checkRecaptcha(recaptcha_response):
         return False
 
     return True
-
-class TokenFactory():
-    def createToken(self, username):
-        AccountInfo = Account.objects.get(username=username)
 
 
 """
@@ -136,7 +135,7 @@ class verifyExistence(APIView):
 
 
 class EmailActivate(APIView):
-    permission_classes = (permissions.AllowAny, )
+    permission_classes = (AllowAny, )
 
     def get(self, request, uidb64, token):
         try:
@@ -161,31 +160,39 @@ post : login
 delete : logout
 """
 class AccountAuthentication(APIView):
+    authentication_classes = (BasicAuthentication, )
+    permission_classes = (AllowAny, )
+
     def authenticateAccount(self, username, password):
         try:
             AccountInfo = Account.objects.get(username=username)
 
             if check_password(password, AccountInfo.password):
-                return True
+                if AccountInfo.status == 'O':
+                    return True
+                else:
+                    return False
             else:
                 return False
         except:
             return False
 
     def post(self, request):
-        form_data = AccountLoginForm(request.data)
-
         if not checkRecaptcha(request.data['g-recaptcha-response']):
-            return Response("failed", status=HTTP_400_BAD_REQUEST)
+            return Response("fail.", status=HTTP_400_BAD_REQUEST)
 
-        if form_data.is_valid():
-            username = form_data.cleaned_data['username']
-            password = form_data.cleaned_data['password']
-            if self.authenticateAccount(username=username, password=password):
-                token_factory = TokenFactory()
-                token_key = token_factory.createToken(username)
-                return Response({'token': token_key}, status=HTTP_200_OK)
+        username = request.data['username']
+        password = request.data['password']
+
+        if self.authenticateAccount(username=username, password=password):
+            url = "http://localhost:8000/api/token/"
+            r = requests.post(url, data={'username': username, 'password': password})
+            if not r.json()['token']:
+                return Response('fail', status=HTTP_400_BAD_REQUEST)
             else:
-                return Response('fail.', status=HTTP_400_BAD_REQUEST)
+                token = r.json()['token']
+                return Response({'token': token}, status=HTTP_200_OK)
+        else:
+            return Response('fail.', status=HTTP_400_BAD_REQUEST)
 
         return Response('failed', status=HTTP_400_BAD_REQUEST)
