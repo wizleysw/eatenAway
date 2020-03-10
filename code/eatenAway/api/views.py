@@ -1,8 +1,6 @@
-import urllib
-import json
-
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from user.forms import AccountForm
 from django.http import Http404
 from rest_framework.response import Response
@@ -15,15 +13,11 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
 from django.utils.encoding import force_bytes, force_text
-from rest_framework import permissions
 from django.shortcuts import render
 from django.contrib.auth.hashers import check_password
 import requests
-import time
-import jwt
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+import urllib
+import json
 
 
 def checkRecaptcha(recaptcha_response):
@@ -59,12 +53,12 @@ class AccountList(APIView):
             return Response("fail.", status=HTTP_400_BAD_REQUEST)
 
         if form_data.is_valid():
-            cl = verifyExistence()
-            ac = verifyExistence.getObject_with_username(cl, form_data.cleaned_data['username'])
+            cl = VerifyExistence()
+            ac = VerifyExistence.getObject_with_username(cl, form_data.cleaned_data['username'])
             if not AccountSerializer(ac).validate_username(form_data.cleaned_data['username']):
                 return Response('fail.', status=HTTP_400_BAD_REQUEST)
 
-            ac = verifyExistence.getObject_with_email(cl, form_data.cleaned_data['email'])
+            ac = VerifyExistence.getObject_with_email(cl, form_data.cleaned_data['email'])
             if not AccountSerializer(ac).validate_email(form_data.cleaned_data['email']):
                 return Response('fail.', status=HTTP_400_BAD_REQUEST)
 
@@ -98,9 +92,7 @@ GET /api/accounts/verify/<str:id>/
 email 중복 검사 : 
 POST /api/accounts/verify/
 """
-
-
-class verifyExistence(APIView):
+class VerifyExistence(APIView):
     def getObject_with_username(self, username):
         try:
             return Account.objects.get(username=username)

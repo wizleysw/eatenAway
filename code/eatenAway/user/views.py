@@ -1,15 +1,35 @@
-from django.utils import timezone
-import datetime
-from .forms import AccountForm
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import *
 import requests
 
+
+def checkTokenVerification(request):
+    if (request.COOKIES.get('token')):
+        url = "http://localhost:8000/api/token/verify/"
+        r = requests.post(url, data={'token': request.COOKIES.get('token')})
+        if (r.status_code == 400):
+            return False
+        if not r.json()['token']:
+            return False
+        else:
+            return True
+    return False
+
+
+def introPage(request):
+    return render(request, 'intro.html', {})
+
+
 def mainPage(request):
-    return render(request, 'index.html', {})
+    if (request.COOKIES.get('token')):
+        if checkTokenVerification(request):
+            return render(request, 'main.html', {})
+        else:
+            response = HttpResponseRedirect('/user/login')
+            response.delete_cookie('token')
+            return response
+    else:
+        return redirect('/user/intro/')
 
 
 def login(request):
@@ -20,11 +40,23 @@ def login(request):
 
         url = "http://localhost:8000/api/accounts/login/"
         r = requests.post(url, data={'username': username, 'password': password, 'g-recaptcha-response': recaptcha})
-        print('LOGIN : ', r.status_code)
-        print('LOGIN : ', r.text)
 
-        return render(request, 'index.html', {})
+        if not r.json()['token']:
+            return render(request, 'login.html', {})
+        else:
+            token = r.json()['token']
+            response = HttpResponseRedirect('/user/main/')
+            response.set_cookie('token', token)
+            return response
     else:
+        if(request.COOKIES.get('token')):
+            if checkTokenVerification(request):
+                response = HttpResponseRedirect('/user/main')
+                return response
+            else:
+                response = HttpResponseRedirect('/user/login')
+                response.delete_cookie('token')
+                return response
         return render(request, 'login.html', {})
 
 
