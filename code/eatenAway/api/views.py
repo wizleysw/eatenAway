@@ -40,7 +40,6 @@ def checkRecaptcha(recaptcha_response):
 """
 회원가입 폼 검증 및 등록:
 POST /api/accounts/
-
 """
 class AccountList(APIView):
     def get(self, request):

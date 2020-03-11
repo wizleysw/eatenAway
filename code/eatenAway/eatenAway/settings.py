@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'rest_auth.registration',
     'user',
+    'food',
     'api',
     'rest_framework_jwt',
 ]
