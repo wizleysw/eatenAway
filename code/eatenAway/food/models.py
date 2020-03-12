@@ -9,7 +9,7 @@ class Food(models.Model):
     taste = models.CharField(verbose_name='맛', max_length=30,)
     stock = models.BooleanField(verbose_name='국물여부', default=False)
     description = models.CharField(verbose_name='설명', max_length=50)
-    profile = models.ImageField(upload_to="food_profile/profile_picture", verbose_name='음식사진', blank=True)
+    profile = models.ImageField(upload_to="eatenAway/static/images/food_profile/", verbose_name='음식사진', blank=True)
 
     is_active = models.BooleanField(verbose_name='활성화 여부', default=True)
 

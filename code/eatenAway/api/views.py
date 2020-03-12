@@ -2,11 +2,12 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from user.forms import AccountForm
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import AccountSerializer
 from user.models import Account
+from food.models import Food
 from eatenAway.settings import GOOGLE_RECAPTCHA_SECRET_KEY
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -15,6 +16,7 @@ from django.core.mail import EmailMessage
 from django.utils.encoding import force_bytes, force_text
 from django.shortcuts import render
 from django.contrib.auth.hashers import check_password
+from django.core import serializers
 import requests
 import urllib
 import json
@@ -41,6 +43,8 @@ def checkRecaptcha(recaptcha_response):
 회원가입 폼 검증 및 등록:
 POST /api/accounts/
 """
+
+
 class AccountList(APIView):
     def get(self, request):
         return Response('HelloWorld')
@@ -91,6 +95,8 @@ GET /api/accounts/verify/<str:id>/
 email 중복 검사 : 
 POST /api/accounts/verify/
 """
+
+
 class VerifyExistence(APIView):
     def getObject_with_username(self, username):
         try:
@@ -126,7 +132,7 @@ class VerifyExistence(APIView):
 
 
 class EmailActivate(APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def get(self, request, uidb64, token):
         try:
@@ -139,20 +145,22 @@ class EmailActivate(APIView):
                 user.status = 'O'
                 user.active = True
                 user.save()
-                return render(request, 'emailverifysuccess.html', {'result':True})
+                return render(request, 'emailverifysuccess.html', {'result': True})
             else:
-                return render(request, 'emailverifysuccess.html', {'result':False})
+                return render(request, 'emailverifysuccess.html', {'result': False})
         except:
-            return render(request, 'emailverifysuccess.html', {'result':False})
+            return render(request, 'emailverifysuccess.html', {'result': False})
 
 
 """
 post : login
 delete : logout
 """
+
+
 class AccountAuthentication(APIView):
-    authentication_classes = (BasicAuthentication, )
-    permission_classes = (AllowAny, )
+    authentication_classes = (BasicAuthentication,)
+    permission_classes = (AllowAny,)
 
     def authenticateAccount(self, username, password):
         try:
@@ -187,3 +195,40 @@ class AccountAuthentication(APIView):
             return Response('fail.', status=HTTP_400_BAD_REQUEST)
 
         return Response('failed', status=HTTP_400_BAD_REQUEST)
+
+
+'''
+get : 음식 정보
+post : 음식 사진 정보
+'''
+class FoodList(APIView):
+    authentication_classes = (BasicAuthentication,)
+    permission_classes = (AllowAny,)
+
+    def get(self, request, foodname):
+        if not foodname:
+            return Response(status=HTTP_400_BAD_REQUEST)
+        try:
+            menu = Food.objects.get(menuname=foodname)
+            data = {
+                'menuname': menu.menuname,
+                'category': menu.category,
+                'country': menu.country,
+                'taste': menu.taste,
+                'stock': menu.stock,
+                'description': menu.description
+                # 'profile': menu.profile
+            }
+            return Response(data, status=HTTP_200_OK)
+
+        except:
+            return Response('fail', status=HTTP_400_BAD_REQUEST)
+
+    def post(self, request):
+        if not request.data['foodname']:
+            return Response(status=HTTP_400_BAD_REQUEST)
+        try:
+            img = Food.objects.get(menuname=request.data['foodname']).profile
+            return HttpResponse(img, content_type='*/*', status=HTTP_200_OK)
+        except:
+            return Response('fail', status=HTTP_400_BAD_REQUEST)

@@ -42,7 +42,7 @@ class Account(AbstractBaseUser):
     email = models.EmailField(max_length=32, verbose_name='이메일')
     created_date = models.DateTimeField(auto_now_add=True, verbose_name="가입날짜")
     comment = models.CharField(max_length=20, verbose_name='코멘트', blank=True)
-    profile = models.ImageField(upload_to="user_profile/profile_picture", verbose_name='프로필', blank=True)
+    profile = models.ImageField(upload_to="eatenAway/static/images/profile_img", verbose_name='프로필', blank=True)
 
     account_status_selection = (
         ('O', '정상'),
