@@ -16,5 +16,6 @@ urlpatterns = [
 
     path('food/', views.FoodList.as_view()),
     path('food/<str:foodname>', views.FoodList.as_view()),
+    path('food/user/<str:username>', views.UserDailyFoodList.as_view()),
 ]
 

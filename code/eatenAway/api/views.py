@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import AccountSerializer
 from user.models import Account
-from food.models import Food
+from food.models import Food, DailyUserFood
 from eatenAway.settings import GOOGLE_RECAPTCHA_SECRET_KEY
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -20,6 +20,7 @@ from django.core import serializers
 import requests
 import urllib
 import json
+import datetime
 
 
 def checkRecaptcha(recaptcha_response):
@@ -43,8 +44,6 @@ def checkRecaptcha(recaptcha_response):
 회원가입 폼 검증 및 등록:
 POST /api/accounts/
 """
-
-
 class AccountList(APIView):
     def get(self, request):
         return Response('HelloWorld')
@@ -95,8 +94,6 @@ GET /api/accounts/verify/<str:id>/
 email 중복 검사 : 
 POST /api/accounts/verify/
 """
-
-
 class VerifyExistence(APIView):
     def getObject_with_username(self, username):
         try:
@@ -156,8 +153,6 @@ class EmailActivate(APIView):
 post : login
 delete : logout
 """
-
-
 class AccountAuthentication(APIView):
     authentication_classes = (BasicAuthentication,)
     permission_classes = (AllowAny,)
@@ -202,6 +197,7 @@ get : 음식 정보
 post : 음식 사진 정보
 '''
 class FoodList(APIView):
+    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
     authentication_classes = (BasicAuthentication,)
     permission_classes = (AllowAny,)
 
@@ -232,3 +228,54 @@ class FoodList(APIView):
             return HttpResponse(img, content_type='*/*', status=HTTP_200_OK)
         except:
             return Response('fail', status=HTTP_400_BAD_REQUEST)
+
+"""
+get : 이 주간 먹은 메뉴 개수 리턴
+"""
+
+class UserDailyFoodList(APIView):
+    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
+    authentication_classes = (BasicAuthentication,)
+    permission_classes = (AllowAny,)
+
+    def get(self, request, username):
+        if not username:
+            return Response(HTTP_400_BAD_REQUEST)
+        try:
+            data = DailyUserFood.objects.filter(username=username, date__range=[datetime.date.today() - datetime.timedelta(days=14), datetime.date.today()])
+            if not data.exists():
+                return Response('no info', HTTP_400_BAD_REQUEST)
+            else:
+                # res = {}
+                # res['username'] = username
+                # for row in data:
+                #     if not row.food in res:
+                #         res[row.food] = 1
+                #     else:
+                #         res[row.food] += 1
+                #     if not row.__str__() in res:
+                #         res[row.__str__()] = row.food
+
+                res = dict()
+                foodcount = dict()
+                dateinfo = dict()
+                for row in data:
+
+                    if not row.food in foodcount:
+                        foodcount[row.food] = 1
+                    else:
+                        foodcount[row.food] +=1
+
+                    if not str(row.date) in dateinfo:
+                        dateinfo[str(row.date)] = dict()
+                        dateinfo[str(row.date)][row.mealkind] = row.food
+
+                    else:
+                        dateinfo[str(row.date)][row.mealkind] = row.food
+
+                res['foodcount'] = foodcount
+                res['dateinfo'] = dateinfo
+                json_res = json.dumps(res)
+                return Response(json_res, HTTP_200_OK)
+        except:
+            return Response(HTTP_400_BAD_REQUEST)

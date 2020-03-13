@@ -10,9 +10,4 @@ def testPage(request, foodname):
         return redirect('/user/intro/')
     menu = r.json()
 
-    r = requests.post(url, data={'foodname': menu['menuname']})
-    if r.status_code == 200:
-        img = r.raw.read()
-        print(len(img))
-
     return render(request, 'foodmenu.html', {'menu':menu})

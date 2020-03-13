@@ -15,3 +15,22 @@ class Food(models.Model):
 
     def __str__(self):
         return self.menuname
+
+
+class DailyUserFood(models.Model):
+    username = models.CharField(max_length=10, verbose_name='유저')
+    food = models.CharField(max_length=30, verbose_name='메뉴')
+    meal_selection = (
+        ('B', '아침'),
+        ('L', '점심'),
+        ('D', '저녁'),
+    )
+    mealkind = models.CharField(max_length=1, verbose_name='식사종류', choices=meal_selection, default='L')
+
+    date = models.DateField(verbose_name='날짜')
+
+    # location = models.CharField(max_length=64, verbose_name='장소')
+
+    def __str__(self):
+        return self.username + ':' + str(self.date) + ':' + self.mealkind
+

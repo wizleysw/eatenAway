@@ -59,12 +59,12 @@
             </section>
             <section>
                 <span class="icon solid style2 major fa-save"></span>
-                <h3>음식의 기원지</h3>
+                <h3>{{ menu.menuname }}의 기원지</h3>
                 <p>{{ menu.country }}</p>
             </section>
             <section>
                 <span class="icon solid style2 major fa-chart-bar"></span>
-                <h3>맛</h3>
+                <h3>평균적인 맛</h3>
                 {% if menu.taste == '1' %}
                 <p>단맛이 아주 강한 편입니다.</p>
                 {% elif menu.taste == '2' %}
@@ -72,7 +72,7 @@
                 {% elif menu.taste == '3' %}
                 <p>단맛이 약간 있는 편입니다.</p>
                 {% elif menu.taste == '4' %}
-                <p>단맛과 짠맛이 평균적인 편입니다.</p>
+                <p>단맛, 짠맛 그리고 매운맛의 조화가 평균에 가깝습니다.</p>
                 {% elif menu.taste == '5' %}
                 <p>살짝 매콤한 맛인 편입니다.</p>
                 {% elif menu.taste == '6' %}
@@ -88,11 +88,11 @@
             </section>
             <section>
                 <span class="icon solid style2 major fa-leaf"></span>
-                <h3>국물 여부</h3>
+                <h3>수분기</h3>
                 {% if menu.stock %}
-                <p>국물이 있는 메뉴입니다.</p>
-                {{% else %}
-                <p>국물이 없는 메뉴입니다.</p>
+                <p>국물 또는 육수와 함께 즐길 수 있는 메뉴입니다.</p>
+                {% else %}
+                <p>수분기가 적거나 없는 메뉴입니다.</p>
                 {% endif %}
 
             </section>
