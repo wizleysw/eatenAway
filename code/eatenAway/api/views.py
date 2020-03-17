@@ -242,20 +242,10 @@ class UserDailyFoodList(APIView):
         if not username:
             return Response(HTTP_400_BAD_REQUEST)
         try:
-            data = DailyUserFood.objects.filter(username=username, date__range=[datetime.date.today() - datetime.timedelta(days=14), datetime.date.today()])
+            data = DailyUserFood.objects.filter(username=username, date__range=[datetime.date.today() - datetime.timedelta(days=9), datetime.date.today()])
             if not data.exists():
                 return Response('no info', HTTP_400_BAD_REQUEST)
             else:
-                # res = {}
-                # res['username'] = username
-                # for row in data:
-                #     if not row.food in res:
-                #         res[row.food] = 1
-                #     else:
-                #         res[row.food] += 1
-                #     if not row.__str__() in res:
-                #         res[row.__str__()] = row.food
-
                 res = dict()
                 foodcount = dict()
                 dateinfo = dict()
@@ -274,8 +264,29 @@ class UserDailyFoodList(APIView):
                         dateinfo[str(row.date)][row.mealkind] = row.food
 
                 res['foodcount'] = foodcount
-                res['dateinfo'] = dateinfo
+                res['dateinfo'] = sorted(dateinfo.items())
                 json_res = json.dumps(res)
+                return Response(json_res, HTTP_200_OK)
+        except:
+            return Response(HTTP_400_BAD_REQUEST)
+
+    def post(self, request, username):
+        if not username:
+            return Response(HTTP_400_BAD_REQUEST)
+        if not request.POST.get('foodname'):
+            return Response(status=HTTP_400_BAD_REQUEST)
+        try:
+            data = DailyUserFood.objects.filter(username=username, food=request.data['foodname'])
+            if not data.exists():
+                return Response(HTTP_400_BAD_REQUEST)
+            else:
+                res = dict()
+                for row in data:
+                    if not row.mealkind in res:
+                        res[row.mealkind] = 1
+                    else:
+                        res[row.mealkind] += 1
+                    json_res = json.dumps(res)
                 return Response(json_res, HTTP_200_OK)
         except:
             return Response(HTTP_400_BAD_REQUEST)

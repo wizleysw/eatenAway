@@ -1,6 +1,8 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from eatenAway.settings import JWT_AUTH
 import requests
+import jwt, json
 
 
 def checkTokenVerification(request):
@@ -23,7 +25,11 @@ def introPage(request):
 def mainPage(request):
     if (request.COOKIES.get('token')):
         if checkTokenVerification(request):
-            return render(request, 'main.html', {})
+            jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
+            url = "http://localhost:8000/api/food/user/"
+            r = requests.get(url+jwt_value['username'])
+            res = json.loads(r.json())
+            return render(request, 'main.html', {'username':jwt_value['username'], 'foodcount':res['foodcount'], 'dateinfo':res['dateinfo']})
         else:
             response = HttpResponseRedirect('/user/login')
             response.delete_cookie('token')

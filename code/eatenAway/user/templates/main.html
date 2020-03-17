@@ -20,15 +20,7 @@
 <!DOCTYPE HTML>
 
 <html>
-<head>
-    <title>Story by HTML5 UP</title>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
-    <link rel="stylesheet" href="assets/css/main.css"/>
-    <noscript>
-        <link rel="stylesheet" href="assets/css/noscript.css"/>
-    </noscript>
-</head>
+
 <body class="is-preload">
 
 <!-- Wrapper -->
@@ -39,7 +31,7 @@
             class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
         <div class="content">
             <h1>eaten-Away</h1>
-            <p class="major">아, 참! 그동안 당신의 음식패턴에 대해 정리해보았답니다.
+            <p class="major">아, 참! 그동안 {{ username }}님의 음식패턴에 대해 정리해보았답니다.
             </p>
             <p>같이 어제와 오늘 그리고 다가올 미래에 대해서 분석하고 고민해볼까요?<br><br>
 
@@ -49,77 +41,61 @@
         </div>
     </section>
 
-    <!-- Additional Elements -->
     <section class="wrapper style1 align-center">
         <div class="inner">
-            <h2>Additional Elements</h2>
-            <p>Finally, here are some additional elements you <em>might</em> find useful (and yup, they look fine with
-                any <span class="demo-controls">appearance</span>).</p>
-            <div class="index align-left">
+            <h2>What did you Eat? What's Your Favourites?</h2>
+            <p>최근에 드신 음식을 횟수를 기준으로 통계를 내보았어요.</p>
+
+            <section>
+                <div class="content" align="center">
+                    <div id="columnchart_values" style="width: 900px; height: 300px;" align="center"></div>
+                    <br><br><br>
+                </div>
+            </section>
+        </div>
+    </section>
 
 
-                <!-- Form -->
+    <section class="wrapper style1 align-center">
+        <div class="inner">
+            <h2>Food TimeTable</h2>
+            <p>이번에는 날짜별로 음식을 정리해보았어요. 오늘을 포함한 9일동안 먹은 메뉴는 다음과 같답니다.</p>
+            <div class="items style1 medium onscroll-fade-in">
+                {% for key, value in dateinfo %}
                 <section>
-                    <header>
-                        <h3>Form</h3>
-                    </header>
-                    <div class="content">
+                    <span class="icon style2 major fa-bolt"></span>
+                    <h3>{{ key }}</h3>
+                    {% if value.B %}
+                    <a href="/food/menu/{{value.B}}">{{ value.B|default:"-" }}</a><br>
+                    {% else %}-<br>
+                    {% endif %}
+                    {% if value.L %}
+                    <a href="/food/menu/{{value.L}}">{{ value.L|default:"-" }}</a><br>
+                    {% else %}-<br>
+                    {% endif %}
+                    {% if value.D %}
+                    <a href="/food/menu/{{value.D}}">{{ value.D|default:"-" }}</a><br><br>
+                    {% else %}-<br><br>
+                    {% endif %}
+                </section>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
 
-                        <form method="post" action="#">
-                            <div class="fields">
-                                <div class="field half">
-                                    <label for="name">Name</label>
-                                    <input type="text" name="name" id="name" value=""/>
-                                </div>
-                                <div class="field half">
-                                    <label for="email">Email</label>
-                                    <input type="email" name="email" id="email" value=""/>
-                                </div>
-                                <div class="field">
-                                    <label for="department">Department</label>
-                                    <select name="department" id="department">
-                                        <option value="">- Category -</option>
-                                        <option value="1">Manufacturing</option>
-                                        <option value="2">Shipping</option>
-                                        <option value="3">Administration</option>
-                                        <option value="4">Human Resources</option>
-                                    </select>
-                                </div>
-                                <div class="field third">
-                                    <input type="radio" id="priority-low" name="priority" checked/>
-                                    <label for="priority-low">Low Priority</label>
-                                </div>
-                                <div class="field third">
-                                    <input type="radio" id="priority-normal" name="priority"/>
-                                    <label for="priority-normal">Normal Priority</label>
-                                </div>
-                                <div class="field third">
-                                    <input type="radio" id="priority-high" name="priority"/>
-                                    <label for="priority-high">High Priority</label>
-                                </div>
-                                <div class="field">
-                                    <label for="message">Message</label>
-                                    <textarea name="message" id="message" rows="6"></textarea>
-                                </div>
-                                <div class="field half">
-                                    <input type="checkbox" id="copy" name="copy"/>
-                                    <label for="copy">Email me a copy of this message</label>
-                                </div>
-                                <div class="field half">
-                                    <input type="checkbox" id="human" name="human" checked/>
-                                    <label for="human">I am a human and not a robot</label>
-                                </div>
-                            </div>
-                            <ul class="actions">
-                                <li><input type="submit" name="submit" id="submit" value="Send Message"/></li>
-                            </ul>
-                        </form>
+    <section class="wrapper style1 align-center">
+        <div class="inner">
+            <h2>Find Food For Thought</h2>
+                <section>
+                    <div class="content">
+                        <p>직접 음식에 대해서 검색해볼 수 있어요.<br>(음식에 대한 정보가 존재하지 않을 경우 해당 페이지로 이동하지 않습니다.)</p>
+                        <div class="box">
+                            <input type="text" id="gowithfoodname" placeholder="음식이름"><br>
+                            <button type="submit" onclick="goFood()">검색하기</button>
+                        </div>
 
                     </div>
                 </section>
-
-
-            </div>
         </div>
     </section>
 
@@ -133,7 +109,7 @@
                 <li><a href="#" class="icon brands style2 fa-linkedin"><span class="label">LinkedIn</span></a></li>
                 <li><a href="#" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
             </ul>
-			<p>&copy; Copyright © 2020 <a href="https://github.com/wizleysw">Wizley</a>. All rights reserved.</p>
+            <p>&copy; Copyright © 2020 <a href="https://github.com/wizleysw">Wizley</a>. All rights reserved.</p>
         </div>
     </footer>
 
@@ -147,6 +123,52 @@
 <script src="{% static 'js/breakpoints.min.js' %}"></script>
 <script src="{% static 'js/util.js' %}"></script>
 <script src="{% static 'js/main.js' %}"></script>
+
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script type="text/javascript">
+    google.charts.load("current", {packages:['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+       ["Element", "먹은 횟수", { role: "style" } ],
+        {% for key, value in foodcount.items %}
+        {% if forloop.counter == 1 %}
+        ["{{ key }}", {{ value }}, "gold"],
+        {% elif forloop.counter == 2 %}
+        ["{{ key }}", {{ value }}, "silver"],
+        {% elif forloop.counter == 3 %}
+        ["{{ key }}", {{ value }}, "color: #b87333"],
+        {% else %}
+        ["{{ key }}", {{ value }}, "color: #e5e4e2"],
+        {% endif %}
+        {% endfor %}
+      ]);
+
+      var view = new google.visualization.DataView(data);
+      view.setColumns([0, 1,
+                       { calc: "stringify",
+                         sourceColumn: 1,
+                         type: "string",
+                         role: "annotation" },
+                       2]);
+
+      var options = {
+        width: 900,
+        height: 600,
+        bar: {groupWidth: "95%"},
+        legend: { position: "none" },
+      };
+      var chart = new google.visualization.ColumnChart(document.getElementById("columnchart_values"));
+      chart.draw(view, options);
+  }
+
+  function goFood(){
+    redirect_url = "http://localhost:8000/food/menu/" + document.getElementById('gowithfoodname').value;
+    window.location.href = redirect_url;
+  }
+  </script>
 
 </body>
 </html>
