@@ -8,7 +8,7 @@ class AccountManager(BaseUserManager):
         if not username:
             raise ValueError('Account must have an username')
         user = self.model(
-            username = username,
+            username=username,
         )
 
         user.set_password(password)

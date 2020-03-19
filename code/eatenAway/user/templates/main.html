@@ -41,9 +41,47 @@
         </div>
     </section>
 
+
+
+    <!-- Gallery -->
+    <section class="wrapper style1 align-center">
+        <div class="inner">
+            <h2>Today's Choice</h2>
+            {% if choice != None %}
+            <p>오늘의 한끼로 추천해드리고 싶은 메뉴를 아래와 같이 선정해보았어요.</p>
+            {% else %}
+            <p>아직 저희에게 음식에 대한 취향을 알려주시지 않아서 맞춤형 추천을 제공할수가 없어요..</p>
+            {% endif %}
+        </div>
+
+        <!-- Gallery -->
+        <div class="gallery style2 medium lightbox onscroll-fade-in">
+            {% if choice %}
+            {% for key, value in choice.items %}
+            {{ key }}
+            {{ value }}
+            <article>
+                <a href="{% static 'images/user/main/water.png' %}" class="image">
+<!--                    <img src="{% static 'images/food_profile/' %}{{ value }}.png" alt="" />-->
+                    <img src="{% static 'images/user/main/water.png' %}" alt="" />
+                </a>
+                <div class="caption">
+                    <h3>{{ value }}</h3>
+                    <p>{{ key }}</p>
+                    <ul class="actions fixed">
+                        <a href="/food/menu/{{ value }}"><li><span class="button small">세부정보 보기</span></a></li>
+                    </ul>
+                </div>
+            </article>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </section>
+
     <section class="wrapper style1 align-center">
         <div class="inner">
             <h2>What did you Eat? What's Your Favourites?</h2>
+            {% if foodcount %}
             <p>최근에 드신 음식을 횟수를 기준으로 통계를 내보았어요.</p>
 
             <section>
@@ -52,6 +90,9 @@
                     <br><br><br>
                 </div>
             </section>
+            {% else %}
+            아직 통계에 사용할 정보가 없어요.!
+            {% endif %}
         </div>
     </section>
 
@@ -59,6 +100,7 @@
     <section class="wrapper style1 align-center">
         <div class="inner">
             <h2>Food TimeTable</h2>
+            {% if dateinfo %}
             <p>이번에는 날짜별로 음식을 정리해보았어요. 오늘을 포함한 9일동안 먹은 메뉴는 다음과 같답니다.</p>
             <div class="items style1 medium onscroll-fade-in">
                 {% for key, value in dateinfo %}
@@ -80,22 +122,25 @@
                 </section>
                 {% endfor %}
             </div>
+            {% else %}
+            아직 통계에 사용할 정보가 없어요.!
+            {% endif %}
         </div>
     </section>
 
     <section class="wrapper style1 align-center">
         <div class="inner">
             <h2>Find Food For Thought</h2>
-                <section>
-                    <div class="content">
-                        <p>직접 음식에 대해서 검색해볼 수 있어요.<br>(음식에 대한 정보가 존재하지 않을 경우 해당 페이지로 이동하지 않습니다.)</p>
-                        <div class="box">
-                            <input type="text" id="gowithfoodname" placeholder="음식이름"><br>
-                            <button type="submit" onclick="goFood()">검색하기</button>
-                        </div>
-
+            <section>
+                <div class="content">
+                    <p>직접 음식에 대해서 검색해볼 수 있어요.<br>(음식에 대한 정보가 존재하지 않을 경우 해당 페이지로 이동하지 않습니다.)</p>
+                    <div class="box">
+                        <input type="text" id="gowithfoodname" placeholder="음식이름"><br>
+                        <button type="submit" onclick="goFood()">검색하기</button>
                     </div>
-                </section>
+
+                </div>
+            </section>
         </div>
     </section>
 

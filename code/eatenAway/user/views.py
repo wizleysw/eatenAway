@@ -26,10 +26,22 @@ def mainPage(request):
     if (request.COOKIES.get('token')):
         if checkTokenVerification(request):
             jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
+            try:
+                url = "http://localhost:8000/api/food/preference/"
+                r = requests.get(url+jwt_value['username'])
+                if r.status_code != 200:
+                    choice = None
+                else:
+                    choice = r.json()
+            except:
+                choice = None
             url = "http://localhost:8000/api/food/user/"
             r = requests.get(url+jwt_value['username'])
-            res = json.loads(r.json())
-            return render(request, 'main.html', {'username':jwt_value['username'], 'foodcount':res['foodcount'], 'dateinfo':res['dateinfo']})
+            try:
+                res = json.loads(r.json())
+                return render(request, 'main.html', {'username':jwt_value['username'], 'foodcount':res['foodcount'], 'dateinfo':res['dateinfo'], 'choice':choice})
+            except:
+                return render(request, 'main.html', {'username':jwt_value['username'], 'choice':choice})
         else:
             response = HttpResponseRedirect('/user/login')
             response.delete_cookie('token')

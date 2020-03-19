@@ -1,4 +1,4 @@
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from user.forms import AccountForm
@@ -21,6 +21,7 @@ import requests
 import urllib
 import json
 import datetime
+import operator
 
 
 def checkRecaptcha(recaptcha_response):
@@ -45,6 +46,8 @@ def checkRecaptcha(recaptcha_response):
 POST /api/accounts/
 """
 class AccountList(APIView):
+    permission_classes = (AllowAny,)
+
     def get(self, request):
         return Response('HelloWorld')
 
@@ -95,6 +98,8 @@ email 중복 검사 :
 POST /api/accounts/verify/
 """
 class VerifyExistence(APIView):
+    permission_classes = (AllowAny,)
+
     def getObject_with_username(self, username):
         try:
             return Account.objects.get(username=username)
@@ -288,5 +293,92 @@ class UserDailyFoodList(APIView):
                         res[row.mealkind] += 1
                     json_res = json.dumps(res)
                 return Response(json_res, HTTP_200_OK)
+        except:
+            return Response(HTTP_400_BAD_REQUEST)
+
+class UserFoodPreferenceList(APIView):
+    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
+    authentication_classes = (BasicAuthentication,)
+    permission_classes = (AllowAny,)
+
+    def get(self, request, username):
+        try:
+            data = DailyUserFood.objects.filter(username=username, date__range=[datetime.date.today() - datetime.timedelta(days=9), datetime.date.today()])
+            if not data.exists():
+                return Response('no info', HTTP_400_BAD_REQUEST)
+            else:
+                res = dict()
+                mostpick = dict()
+                categories = dict()
+                ingredients = dict()
+                countries = dict()
+
+                count = 0
+                taste = 0
+                for row in data:
+                    foodname = row.food
+                    foodname_based_data = Food.objects.get(menuname=foodname)
+                    taste += int(foodname_based_data.taste)
+
+                    if not foodname_based_data.menuname in mostpick:
+                        mostpick[foodname_based_data.menuname] = 1
+                    else:
+                        mostpick[foodname_based_data.menuname] += 1
+
+                    if not foodname_based_data.ingredient in ingredients:
+                        ingredients[foodname_based_data.ingredient] = 1
+                    else:
+                        ingredients[foodname_based_data.ingredient] += 1
+
+                    if not foodname_based_data.category in categories:
+                        categories[foodname_based_data.category] = 1
+                    else:
+                        categories[foodname_based_data.category] += 1
+
+                    if not foodname_based_data.country in countries:
+                        countries[foodname_based_data.country] = 1
+                    else:
+                        countries[foodname_based_data.country] += 1
+
+                    count += 1
+
+                taste = int(taste/count)
+                mostpick = sorted(mostpick.items(), key=operator.itemgetter(1), reverse=True)
+                ingredients = sorted(ingredients.items(), key=operator.itemgetter(1), reverse=True)
+                categories = sorted(categories.items(), key=operator.itemgetter(1), reverse=True)
+                countries = sorted(countries.items(), key=operator.itemgetter(1), reverse=True)
+
+                res['모스트 원픽'] = Food.objects.filter(menuname=mostpick[0][0]).order_by("?").first().menuname
+
+                tmp = Food.objects.filter(taste=taste).order_by("?").first().menuname
+                while tmp in res.values():
+                    tmp = Food.objects.filter(taste=taste).order_by("?").first().menuname
+                res['평균적인 맛에 의거한 추천'] = tmp
+
+                tmp = Food.objects.filter(ingredient=ingredients[0][0]).order_by("?").first().menuname
+                while tmp in res.values():
+                    tmp = Food.objects.filter(ingredient=ingredients[0][0]).order_by("?").first().menuname
+                res['재료에 의한 추천'] = tmp
+
+                tmp = Food.objects.filter(category=categories[0][0]).order_by("?").first().menuname
+                while tmp in res.values():
+                    tmp = Food.objects.filter(category=categories[0][0]).order_by("?").first().menuname
+                res['음식의 종류에 따른 추천'] = tmp
+
+                tmp = Food.objects.filter(country=countries[0][0]).order_by("?").first().menuname
+                while tmp in res.values():
+                    tmp = Food.objects.filter(country=countries[0][0]).order_by("?").first().menuname
+                res['특정 나라음식 추천'] = tmp
+
+                tmp = Food.objects.order_by("?").first().menuname
+                while tmp in res.values():
+                    tmp = Food.objects.order_by("?").first().menuname
+                res['랜덤 추천'] = tmp
+
+                tmp = Food.objects.order_by("?").first().menuname
+                while tmp in res.values():
+                    tmp = Food.objects.order_by("?").first().menuname
+                res['묻지마 추천'] = tmp
+                return Response(res, HTTP_200_OK)
         except:
             return Response(HTTP_400_BAD_REQUEST)
