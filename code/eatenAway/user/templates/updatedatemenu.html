@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+{% load static %}
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+    <title>정보 입력하기</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}"/>
+    <noscript>
+        <link rel="stylesheet" href="{% static 'css/noscript.css' %}"/>
+    </noscript>
+</head>
+<body class="is-preload">
+<script src='https://www.google.com/recaptcha/api.js' async defer></script>
+<script>
+
+</script>
+<!-- Wrapper -->
+<div id="wrapper" class="divided">
+
+    <!-- Spotlight -->
+    <section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
+        <div class="content">
+            <h2>정보 추가하기</h2>
+            <p>결과는 다음과 같습니다.</p>
+        </div>
+        <div class="image">
+            <a href="/user/main"><img src="{% static 'images/food/chef.jpg' %}" alt=""/></a>
+        </div>
+    </section>
+
+    <section class="wrapper style1 align-center">
+        <div class="inner">
+            <h2></h2>
+            <p>{{ msg }}</p>
+            <div class="items style1 medium onscroll-fade-in">
+                <section>
+                    <span class="icon style2 major fa-bolt"></span>
+                    <h3>Breakfast</h3>
+                    {% if Breakfast != '-' %}
+                    <a href="/food/menu/{{ Breakfast }}">{{ Breakfast }}</a><br>
+                    {% endif %}
+                </section>
+                <section>
+                    <span class="icon style2 major fa-bolt"></span>
+                    <h3>Lunch</h3>
+                    {% if Lunch != '-' %}
+                    <a href="/food/menu/{{ Breakfast }}">{{ Lunch }}</a><br>
+                    {% endif %}
+                </section>
+                <section>
+                    <span class="icon style2 major fa-bolt"></span>
+                    <h3>Dinner</h3>
+                    {% if Dinner != '-' %}
+                    <a href="/food/menu/{{ Breakfast }}">{{ Dinner }}</a><br>
+                    {% endif %}
+                </section>
+            </div>
+        </div>
+    </section>
+
+</div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="wrapper style1 align-center">
+    <div class="inner">
+        <ul class="icons">
+            <li><a href="#" class="icon brands style2 fa-twitter"><span class="label">Twitter</span></a></li>
+            <li><a href="#" class="icon brands style2 fa-facebook-f"><span class="label">Facebook</span></a></li>
+            <li><a href="#" class="icon brands style2 fa-instagram"><span class="label">Instagram</span></a></li>
+            <li><a href="#" class="icon brands style2 fa-linkedin"><span class="label">LinkedIn</span></a></li>
+            <li><a href="#" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+        </ul>
+        <p>&copy; Copyright © 2020 <a href="https://github.com/wizleysw">Wizley</a>. All rights reserved.</p>
+    </div>
+</footer>
+
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery.scrollex.min.js' %}"></script>
+<script src="{% static 'js/jquery.scrolly.min.js' %}"></script>
+<script src="{% static 'js/browser.min.js' %}"></script>
+<script src="{% static 'js/breakpoints.min.js' %}"></script>
+<script src="{% static 'js/util.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/addmenu.js' %}"></script>
+</body>
+</html>

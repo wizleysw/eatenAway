@@ -237,7 +237,6 @@ class FoodList(APIView):
 """
 get : 이 주간 먹은 메뉴 개수 리턴
 """
-
 class UserDailyFoodList(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
     authentication_classes = (BasicAuthentication,)
@@ -296,6 +295,9 @@ class UserDailyFoodList(APIView):
         except:
             return Response(HTTP_400_BAD_REQUEST)
 
+'''
+get : user의 추천 음식 리스트 생성
+'''
 class UserFoodPreferenceList(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
     authentication_classes = (BasicAuthentication,)
@@ -382,3 +384,48 @@ class UserFoodPreferenceList(APIView):
                 return Response(res, HTTP_200_OK)
         except:
             return Response(HTTP_400_BAD_REQUEST)
+
+'''
+get : 특정 일자의 유저의 아침/점심/저녁 리스트 리턴
+post : 특정 일자의 아침/점심/저녁 정보 추가 또는 업데이트 및 삭제
+'''
+class UserFoodByDate(APIView):
+    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
+    authentication_classes = (BasicAuthentication,)
+    permission_classes = (AllowAny,)
+
+    def get(self, request, username, date):
+        data = DailyUserFood.objects.filter(username=username, date=date)
+        if not data.exists():
+            return Response(HTTP_400_BAD_REQUEST)
+        else:
+            res = {}
+            res['B'] = res['L'] = res['D'] = '-'
+            for row in data:
+                res[row.mealkind] = row.food
+            return Response(res, HTTP_200_OK)
+
+
+    def post(self, request, username):
+        try:
+            date = request.data['date']
+            mealkind = request.data['mealkind']
+            foodname = request.data['foodname']
+            food_data = Food.objects.get(menuname=foodname)
+            mealkind_choice = ['B', 'L', 'D']
+            if not mealkind in mealkind_choice:
+                return Response(HTTP_400_BAD_REQUEST)
+        except:
+            return Response(HTTP_400_BAD_REQUEST)
+        try:
+            data = DailyUserFood.objects.get(username=username, date=date, mealkind=mealkind)
+            data.food = foodname
+            data.save()
+            return Response(HTTP_201_CREATED)
+
+        except DailyUserFood.DoesNotExist:
+            data = DailyUserFood(username=username, food=foodname, mealkind=mealkind, date=date)
+            data.save()
+            return Response(HTTP_201_CREATED)
+
+

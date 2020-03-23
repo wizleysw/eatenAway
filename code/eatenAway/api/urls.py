@@ -18,5 +18,8 @@ urlpatterns = [
     path('food/<str:foodname>', views.FoodList.as_view()),
     path('food/user/<str:username>', views.UserDailyFoodList.as_view()),
     path('food/preference/<str:username>', views.UserFoodPreferenceList.as_view()),
+
+    path('food/date/<str:username>/<str:date>', views.UserFoodByDate.as_view()),
+    path('food/date/<str:username>', views.UserFoodByDate.as_view()),
 ]
 

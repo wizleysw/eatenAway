@@ -62,7 +62,7 @@
             {{ value }}
             <article>
                 <a href="{% static 'images/user/main/water.png' %}" class="image">
-<!--                    <img src="{% static 'images/food_profile/' %}{{ value }}.png" alt="" />-->
+                    <!--                    <img src="{% static 'images/food_profile/' %}{{ value }}.png" alt="" />-->
                     <img src="{% static 'images/user/main/water.png' %}" alt="" />
                 </a>
                 <div class="caption">
@@ -125,6 +125,8 @@
             {% else %}
             아직 통계에 사용할 정보가 없어요.!
             {% endif %}
+
+              <a href="/food/addmenu/"><span class="button small">정보 추가/수정하기</span></a>
         </div>
     </section>
 
@@ -133,12 +135,11 @@
             <h2>Find Food For Thought</h2>
             <section>
                 <div class="content">
-                    <p>직접 음식에 대해서 검색해볼 수 있어요.<br>(음식에 대한 정보가 존재하지 않을 경우 해당 페이지로 이동하지 않습니다.)</p>
+                    <p>직접 음식에 대해서 검색해볼 수 있어요.<br></p>
                     <div class="box">
                         <input type="text" id="gowithfoodname" placeholder="음식이름"><br>
                         <button type="submit" onclick="goFood()">검색하기</button>
                     </div>
-
                 </div>
             </section>
         </div>
@@ -168,7 +169,7 @@
 <script src="{% static 'js/breakpoints.min.js' %}"></script>
 <script src="{% static 'js/util.js' %}"></script>
 <script src="{% static 'js/main.js' %}"></script>
-
+<script src="{% static 'js/foodmenu.js' %}"></script>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
@@ -209,11 +210,7 @@
       chart.draw(view, options);
   }
 
-  function goFood(){
-    redirect_url = "http://localhost:8000/food/menu/" + document.getElementById('gowithfoodname').value;
-    window.location.href = redirect_url;
-  }
-  </script>
+</script>
 
 </body>
 </html>
