@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from eatenAway.settings import JWT_AUTH
-import requests
+import requests, operator
 import jwt, json
 
 
@@ -39,7 +39,8 @@ def mainPage(request):
             r = requests.get(url+jwt_value['username'])
             try:
                 res = json.loads(r.json())
-                return render(request, 'main.html', {'username':jwt_value['username'], 'foodcount':res['foodcount'], 'dateinfo':res['dateinfo'], 'choice':choice})
+                food_count = sorted(res['foodcount'].items(), key=operator.itemgetter(1), reverse=True)
+                return render(request, 'main.html', {'username':jwt_value['username'], 'foodcount':food_count, 'dateinfo':res['dateinfo'], 'choice':choice})
             except:
                 return render(request, 'main.html', {'username':jwt_value['username'], 'choice':choice})
         else:

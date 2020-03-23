@@ -178,15 +178,15 @@
     function drawChart() {
       var data = google.visualization.arrayToDataTable([
        ["Element", "먹은 횟수", { role: "style" } ],
-        {% for key, value in foodcount.items %}
+        {% for foodname, count in foodcount %}
         {% if forloop.counter == 1 %}
-        ["{{ key }}", {{ value }}, "gold"],
+        ["{{ foodname }}", {{ count }}, "gold"],
         {% elif forloop.counter == 2 %}
-        ["{{ key }}", {{ value }}, "silver"],
+        ["{{ foodname }}", {{ count }}, "silver"],
         {% elif forloop.counter == 3 %}
-        ["{{ key }}", {{ value }}, "color: #b87333"],
+        ["{{ foodname }}", {{ count }}, "color: #b87333"],
         {% else %}
-        ["{{ key }}", {{ value }}, "color: #e5e4e2"],
+        ["{{ foodname }}", {{ count }}, "color: #e5e4e2"],
         {% endif %}
         {% endfor %}
       ]);
