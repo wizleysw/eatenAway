@@ -5,10 +5,11 @@ from . import views
 
 urlpatterns = [
     path('accounts/', views.AccountList.as_view()),
+    path('accounts/profile/<str:username>', views.AccountProfile.as_view()),
     path('accounts/login/', views.AccountAuthentication.as_view()),
     path('accounts/verify/', views.VerifyExistence.as_view()),
     path('accounts/verify/<str:username>/', views.VerifyExistence.as_view()),
-    path('activate/<str:uidb64>/<str:token>', views.EmailActivate.as_view(), name='activate'),
+    path('activate/<str:uidb64>/<str:token>', views.EmailActivate.as_view()),
 
     path('token/', obtain_jwt_token),
     path('token/verify/', verify_jwt_token),

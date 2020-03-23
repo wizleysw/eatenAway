@@ -89,6 +89,25 @@ class AccountList(APIView):
         else:
             return Response('fail.', status=HTTP_400_BAD_REQUEST)
 
+'''
+get : User 정보 가져옴
+'''
+class AccountProfile(APIView):
+    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
+    authentication_classes = (BasicAuthentication,)
+    permission_classes = (AllowAny,)
+
+    def get(self, request, username):
+        try:
+            user = Account.objects.get(username=username)
+            res = dict()
+            res['area'] = user.area
+            res['sex'] = user.sex
+            res['comment'] = user.comment
+            json_res = json.dumps(res)
+            return Response(json_res, HTTP_200_OK)
+        except:
+            return Response(HTTP_400_BAD_REQUEST)
 
 """
 id 중복 검사 : 

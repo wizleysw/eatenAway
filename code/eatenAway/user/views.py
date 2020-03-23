@@ -27,6 +27,15 @@ def mainPage(request):
         if checkTokenVerification(request):
             jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
             try:
+                url = "http://localhost:8000/api/accounts/profile/"
+                r = requests.get(url+jwt_value['username'])
+                if r.status_code != 200:
+                    user_profile = None
+                else:
+                    user_profile = json.loads(r.json())
+            except:
+                user_profile = None
+            try:
                 url = "http://localhost:8000/api/food/preference/"
                 r = requests.get(url+jwt_value['username'])
                 if r.status_code != 200:
@@ -40,9 +49,9 @@ def mainPage(request):
             try:
                 res = json.loads(r.json())
                 food_count = sorted(res['foodcount'].items(), key=operator.itemgetter(1), reverse=True)
-                return render(request, 'main.html', {'username':jwt_value['username'], 'foodcount':food_count, 'dateinfo':res['dateinfo'], 'choice':choice})
+                return render(request, 'main.html', {'username':jwt_value['username'], 'foodcount':food_count, 'dateinfo':res['dateinfo'], 'choice':choice, 'user_profile':user_profile})
             except:
-                return render(request, 'main.html', {'username':jwt_value['username'], 'choice':choice})
+                return render(request, 'main.html', {'username':jwt_value['username'], 'choice':choice, 'user_profile':user_profile})
         else:
             response = HttpResponseRedirect('/user/login')
             response.delete_cookie('token')
