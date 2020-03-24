@@ -16,6 +16,16 @@ def menuDetail(request, foodname):
             except:
                 chart = {'nope':1}
 
+            try:
+                url = "http://localhost:8000/api/accounts/profile/"
+                r = requests.get(url+jwt_value['username'])
+                if r.status_code != 200:
+                    user_profile = None
+                else:
+                    user_profile = json.loads(r.json())
+            except:
+                user_profile = None
+
             url = "http://localhost:8000/api/food/"
             r = requests.get(url + foodname)
             if not r.status_code == 200:
@@ -23,7 +33,7 @@ def menuDetail(request, foodname):
             menu = r.json()
 
             url = "http://localhost:8000/food/user/"
-            return render(request, 'foodmenu.html', {'username':jwt_value['username'], 'menu': menu, 'chart': chart})
+            return render(request, 'foodmenu.html', {'username':jwt_value['username'], 'menu': menu, 'chart': chart, 'user_profile':user_profile})
 
     else:
         return redirect('/user/intro/')
@@ -43,11 +53,7 @@ def checkDateMenu(request):
             jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
             url = "http://localhost:8000/api/food/date/"
             r = requests.get(url + jwt_value['username'] + '/' + request.POST['date'])
-            if not r.status_code == 200:
-                dateres = {}
-            else:
-                dateres = r.json()
-
+            dateres = r.json()
             return render(request, 'checkdatemenu.html', {'username':jwt_value['username'], 'date':request.POST['date'], 'Breakfast':dateres['B'], 'Lunch':dateres['L'], 'Dinner':dateres['D']})
     else:
         return redirect('/user/intro')

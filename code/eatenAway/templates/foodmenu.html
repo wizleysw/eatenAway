@@ -17,22 +17,6 @@
 </head>
 <body class="is-preload">
 
-<!DOCTYPE HTML>
-<html>
-<head>
-    <title>{{ menu.menuname }}</title>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
-    <link rel="stylesheet" href="assets/css/main.css"/>
-    <noscript>
-        <link rel="stylesheet" href="assets/css/noscript.css"/>
-    </noscript>
-</head>
-<body class="is-preload">
-
-<!-- Wrapper -->
-
-
 <!-- Spotlight -->
 <section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
     <div class="content">
@@ -49,7 +33,7 @@
 <!-- Items -->
 <section class="wrapper style1 align-center">
     <div class="inner">
-        <h2>{{ menu.menuname }}</h2>
+        <h2>This is {{ menu.menuname }} !</h2>
         <p>{{ menu.description }}</p>
         <div class="items style1 medium onscroll-fade-in">
             <section>
@@ -108,8 +92,9 @@
 <section class="wrapper style1 align-center">
     <div class="inner">
         <h2>When You Likely To Eat {{ menu.menuname }} !</h2>
+        {% if not chart.nope %}
         <p>분석에 의하면 {{ username}} 님이 {{ menu.menuname }}을 먹는 패턴은 다음과 같답니다.</p>
-
+        {% endif %}
         <section>
             <div class="content" align="center">
                 {% if chart.nope %}
@@ -120,7 +105,38 @@
                 {% else %}
                 <div id="donutchart" style="width: 1400px; height: 800px;"></div>
                 {% endif %}
-                <br><br><br>
+            </div>
+        </section>
+    </div>
+</section>
+
+<section class="wrapper style1 align-center">
+    <div class="inner">
+        <h2>Good place to eat {{ menu.menuname }} nearby</h2>
+        <p>{{ username}} 님이 등록하신 주소지인 <strong>{{ user_profile.area }}</strong> 기준으로 근처 맛집을 검색해보았어요.</p>
+
+        <section>
+            <div class="content" align="center">
+
+                <div class="map_wrap">
+                    <div id="map" style="width:100%;height:100%;position:relative;overflow:hidden;"></div>
+
+                    <div id="menu_wrap" class="bg_white">
+                        <div class="option">
+                            <div>
+                                <form onsubmit="searchPlaces(); return false;">
+                                    키워드 : <input type="text" value="{{ user_profile.area }} {{ menu.menuname }} 맛집" id="keyword" size="15">
+                                    <button type="submit">검색하기</button>
+                                </form>
+                            </div>
+                        </div>
+                        <hr>
+                        <ul id="placesList"></ul>
+                        <div id="pagination"></div>
+                    </div>
+                </div>
+
+
             </div>
         </section>
     </div>
@@ -152,8 +168,10 @@
 <script src="{% static 'js/main.js' %}"></script>
 <script src="{% static 'js/signup.js' %}"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
+<script src="{% static 'js/foodplace_kakao.js' %}"></script>
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=357f982fe90a1b2717f2e97ef91445f8&libraries=services"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="{% static 'css/kakao-map.css' %}"/>
 <script type="text/javascript">
       google.charts.load("current", {packages:["corechart"]});
       google.charts.setOnLoadCallback(drawChart);
@@ -184,6 +202,21 @@
         var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
         chart.draw(data, options);
       }
+</script>
+
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=357f982fe90a1b2717f2e97ef91445f8&libraries=services"></script>
+<script>
+var markers = [];
+var mapContainer = document.getElementById('map'),
+    mapOption = {
+        center: new kakao.maps.LatLng(37.566826, 126.9786567),
+        level: 3
+    };
+var map = new kakao.maps.Map(mapContainer, mapOption);
+var ps = new kakao.maps.services.Places();
+var infowindow = new kakao.maps.InfoWindow({zIndex:1});
+searchPlaces();
+
 </script>
 
 </body>

@@ -415,11 +415,11 @@ class UserFoodByDate(APIView):
 
     def get(self, request, username, date):
         data = DailyUserFood.objects.filter(username=username, date=date)
+        res = {}
+        res['B'] = res['L'] = res['D'] = '-'
         if not data.exists():
-            return Response(HTTP_400_BAD_REQUEST)
+            return Response(res, HTTP_400_BAD_REQUEST)
         else:
-            res = {}
-            res['B'] = res['L'] = res['D'] = '-'
             for row in data:
                 res[row.mealkind] = row.food
             return Response(res, HTTP_200_OK)
