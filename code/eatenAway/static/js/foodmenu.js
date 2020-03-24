@@ -1,4 +1,7 @@
 function tryRes(foodname){
+    if(foodname == "삭제"){
+        return true;
+    }
 
     $.ajax({
         type: 'GET',

@@ -22,5 +22,6 @@ urlpatterns = [
 
     path('food/date/<str:username>/<str:date>', views.UserFoodByDate.as_view()),
     path('food/date/<str:username>', views.UserFoodByDate.as_view()),
+    path('food/date/<str:username>/<str:date>/<str:mealkind>', views.UserFoodByDate.as_view()),
 ]
 

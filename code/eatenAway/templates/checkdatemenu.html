@@ -73,7 +73,8 @@
                     <div class="content">
 
                         <div class="box">
-                            <p><strong>{{ date }}</strong>일의 음식정보에 대한 수정이 필요하다면 아래의 폼을 작성해주세요.</p>
+                            <p><strong>{{ date }}</strong>일의 음식정보에 대한 수정이 필요하다면 아래의 폼을 작성해주세요.<br>
+                            (만약 정보에 대한 삭제가 필요하다면 메뉴이름칸에 '삭제'를 입력해주세요.)</p>
                             <form id="updatefooddateform" name="updatefooddateForm" action="/food/updatedatemenu/" onsubmit="return foodCheck();" method="POST">
                                 {% csrf_token %}
                                 <input type="text" name="foodname" id="foodname" value="" placeholder="메뉴이름"required/><br>

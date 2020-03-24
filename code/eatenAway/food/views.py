@@ -48,6 +48,9 @@ def addMenu(request):
 
 
 def checkDateMenu(request):
+    if not request.POST:
+        return redirect('/user/intro')
+
     if(request.COOKIES.get('token')):
         if checkTokenVerification(request):
             jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
@@ -60,21 +63,25 @@ def checkDateMenu(request):
 
 
 def updateDateMenu(request):
+    if not request.POST:
+        return redirect('/user/intro')
+
     if(request.COOKIES.get('token')):
         if checkTokenVerification(request):
             jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
             url = "http://localhost:8000/api/food/date/"
-            r = requests.post(url + jwt_value['username'], data=request.POST)
-            if not r.status_code == 200:
+            if request.POST['foodname'] == '삭제':
+                r = requests.delete(url + jwt_value['username'] + '/' + request.POST['date'] + '/' + request.POST['mealkind'])
+            else:
+                r = requests.post(url + jwt_value['username'], data=request.POST)
+            if r.status_code == 200 or r.status_code == 201:
+                msg = '요청이 정상적으로 반영되었습니다.'
+            else:
                 msg = '정보를 다시 확인해주세요.'
 
-            else:
-                msg = '요청이 정상적으로 반영되었습니다.'
-
             r = requests.get(url + jwt_value['username'] + '/' + request.POST['date'])
+            dateres = r.json()
             if not r.status_code == 200:
-                dateres = {}
-            else:
-                dateres = r.json()
+                msg = '정보를 다시 확인해주세요.'
 
             return render(request, 'updatedatemenu.html', {'msg':msg, 'date':request.POST['date'], 'Breakfast':dateres['B'], 'Lunch':dateres['L'], 'Dinner':dateres['D']})

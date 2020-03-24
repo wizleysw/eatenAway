@@ -448,3 +448,10 @@ class UserFoodByDate(APIView):
             return Response(HTTP_201_CREATED)
 
 
+    def delete(self, request, username, date, mealkind):
+        try:
+            data = DailyUserFood.objects.get(username=username, date=date, mealkind=mealkind)
+            data.delete()
+            return Response(HTTP_200_OK)
+        except:
+            return Response(HTTP_400_BAD_REQUEST)
