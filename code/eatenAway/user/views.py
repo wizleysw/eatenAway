@@ -1,15 +1,15 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from eatenAway.settings import JWT_AUTH
-import requests, operator
-import jwt, json
+from .api import APIWithUsername
+from .tokens import Token
+import requests
 
 
 def checkTokenVerification(request):
     if (request.COOKIES.get('token')):
         url = "http://localhost:8000/api/token/verify/"
         r = requests.post(url, data={'token': request.COOKIES.get('token')})
-        if (r.status_code == 400):
+        if r.status_code == 400:
             return False
         if not r.json()['token']:
             return False
@@ -18,87 +18,67 @@ def checkTokenVerification(request):
     return False
 
 
-def introPage(request):
+def RenderIntroPage(request):
     return render(request, 'intro.html', {})
 
 
-def mainPage(request):
-    if (request.COOKIES.get('token')):
-        if checkTokenVerification(request):
-            jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
-            try:
-                url = "http://localhost:8000/api/accounts/profile/"
-                r = requests.get(url+jwt_value['username'])
-                if r.status_code != 200:
-                    user_profile = None
-                else:
-                    user_profile = json.loads(r.json())
-            except:
-                user_profile = None
-            try:
-                url = "http://localhost:8000/api/food/preference/"
-                r = requests.get(url+jwt_value['username'])
-                if r.status_code != 200:
-                    choice = None
-                else:
-                    choice = r.json()
-            except:
-                choice = None
-            url = "http://localhost:8000/api/food/user/"
-            r = requests.get(url+jwt_value['username'])
-            try:
-                res = json.loads(r.json())
-                food_count = sorted(res['foodcount'].items(), key=operator.itemgetter(1), reverse=True)
-                return render(request, 'main.html', {'username':jwt_value['username'], 'foodcount':food_count, 'dateinfo':res['dateinfo'], 'choice':choice, 'user_profile':user_profile})
-            except:
-                return render(request, 'main.html', {'username':jwt_value['username'], 'choice':choice, 'user_profile':user_profile})
-        else:
-            response = HttpResponseRedirect('/user/login')
-            response.delete_cookie('token')
-            return response
+def RenderMainPage(request):
+    tk = Token(request.COOKIES.get('token'))
+    tk_jwt_value = tk.decode_jwt()
+    if tk_jwt_value is not None:
+        username = tk_jwt_value['username']
+        user_api = APIWithUsername(tk_jwt_value['username'])
+        user_profile = user_api.get_user_profile()
+        choice = user_api.get_user_preference()
+        date_info, food_count = user_api.get_user_foodcount()
+        return render(request, 'main.html',
+                      {'username': username, 'foodcount': food_count, 'dateinfo': date_info,
+                       'choice': choice, 'user_profile': user_profile})
     else:
-        return redirect('/user/intro/')
+        response = HttpResponseRedirect('/user/login')
+        response.delete_cookie('token')
+        return response
 
 
-def login(request):
-    if(request.method == 'POST'):
+def RenderLoginPage(request):
+    if request.method == 'POST':
+
         username = request.POST['username']
         password = request.POST['password']
         recaptcha = request.POST['g-recaptcha-response']
 
-        url = "http://localhost:8000/api/accounts/login/"
-        r = requests.post(url, data={'username': username, 'password': password, 'g-recaptcha-response': recaptcha})
+        user_api = APIWithUsername(username)
+        token = user_api.get_user_token(password, recaptcha)
 
-        if not r.json()['token']:
-            return render(request, 'login.html', {})
-        else:
-            token = r.json()['token']
+        if token is not None:
             response = HttpResponseRedirect('/user/main/')
             response.set_cookie('token', token)
             return response
+
+        else:
+            return render(request, 'login.html', {})
+
     else:
-        if(request.COOKIES.get('token')):
-            if checkTokenVerification(request):
+        tk = Token(request.COOKIES.get('token'))
+        if tk.has_token():
+            if tk.verify():
                 response = HttpResponseRedirect('/user/main')
                 return response
-            else:
-                response = HttpResponseRedirect('/user/login')
-                response.delete_cookie('token')
-                return response
-        return render(request, 'login.html', {})
+            response = HttpResponseRedirect('/user/login')
+            response.delete_cookie('token')
+            return response
+        else:
+            return render(request, 'login.html', {})
 
 
-def signup(request):
+def RenderSignupPage(request):
     return render(request, 'signup.html', {})
 
 
-def waitemailcheck(request):
-    try:
-        if(request.method == 'POST'):
-            username = request.POST['username']
-            email = request.POST['email']
-            return render(request, 'waitemailcheck.html', {'username': username, 'email': email})
-        else:
-            return redirect('/user/signup/')
-    except:
+def RenderEmailcheckPage(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        email = request.POST['email']
+        return render(request, 'waitemailcheck.html', {'username': username, 'email': email})
+    else:
         return redirect('/user/signup/')
