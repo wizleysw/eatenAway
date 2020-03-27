@@ -34,8 +34,6 @@ class LoginSerializer(serializers.ModelSerializer):
         model = Account
         fields = ('username', 'password')
 
-        def validate_account(self, value):
-            pass
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -43,3 +41,10 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = FoodComment
         fields = '__all__'
+
+
+class AccountProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = ('area', 'sex', 'comment')

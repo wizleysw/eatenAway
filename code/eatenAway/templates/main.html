@@ -111,7 +111,7 @@
             {% if dateinfo %}
             <p>이번에는 날짜별로 음식을 정리해보았어요. 오늘을 포함한 9일동안 먹은 메뉴는 다음과 같답니다.</p>
             <div class="items style1 medium onscroll-fade-in">
-                {% for key, value in dateinfo %}
+                {% for key, value in dateinfo.items %}
                 <section>
                     <span class="icon style2 major fa-bolt"></span>
                     <h3>{{ key }}</h3>

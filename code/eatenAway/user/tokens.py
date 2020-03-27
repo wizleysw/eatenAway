@@ -13,6 +13,15 @@ class Token:
         else:
             return False
 
+    def get_account_token(self, username, password):
+        url = "http://localhost:8000/api/token/"
+        r = requests.post(url, data={'username': username, 'password': password})
+        if r.status_code == 200:
+            res = r.json()['token']
+        else:
+            res = None
+        return res
+
     def verify(self):
         if self.has_token():
             url = "http://localhost:8000/api/token/verify/"

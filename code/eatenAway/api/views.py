@@ -5,7 +5,7 @@ from user.forms import AccountForm
 from django.http import Http404, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import AccountSerializer, CommentSerializer
+from .serializers import AccountSerializer, CommentSerializer, AccountProfileSerializer
 from user.models import Account
 from food.models import Food, DailyUserFood, FoodComment
 from eatenAway.settings import GOOGLE_RECAPTCHA_SECRET_KEY
@@ -23,6 +23,10 @@ import json
 import datetime
 import operator
 
+from user.tokens import Token
+from .recaptchas import is_recaptcha_correct
+from .accounts import UserAccount
+from .foods import DailyFood, Food
 
 def checkRecaptcha(recaptcha_response):
     url = 'https://www.google.com/recaptcha/api/siteverify'
@@ -89,25 +93,26 @@ class AccountList(APIView):
         else:
             return Response('fail.', status=HTTP_400_BAD_REQUEST)
 
-'''
-get : User 정보 가져옴
-'''
+
+
+"""
+GET : user/apis.py -> get_user_profile (/api/accounts/profile/<str:username>)
+용도  : 토큰의 사용자 아이디 정보로 프로파일 정보 가져옴
+"""
 class AccountProfile(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
     authentication_classes = (BasicAuthentication,)
     permission_classes = (AllowAny,)
+    serializer_class = AccountProfileSerializer
 
     def get(self, request, username):
-        try:
-            user = Account.objects.get(username=username)
-            res = dict()
-            res['area'] = user.area
-            res['sex'] = user.sex
-            res['comment'] = user.comment
-            json_res = json.dumps(res)
-            return Response(json_res, HTTP_200_OK)
-        except:
+        AccountInfo = UserAccount(username, None)
+        if AccountInfo.is_account_available():
+            serialized = AccountProfileSerializer(AccountInfo.account)
+            return Response(serialized.data, HTTP_200_OK)
+        else:
             return Response(HTTP_400_BAD_REQUEST)
+
 
 """
 id 중복 검사 : 
@@ -174,46 +179,29 @@ class EmailActivate(APIView):
 
 
 """
-post : login
-delete : logout
+POST : user/apis.py -> get_user_token (/api/accounts/login/)
+용도  : 사용자 아이디 패스워드 검증 후 token 발급 
 """
 class AccountAuthentication(APIView):
     authentication_classes = (BasicAuthentication,)
     permission_classes = (AllowAny,)
 
-    def authenticateAccount(self, username, password):
-        try:
-            AccountInfo = Account.objects.get(username=username)
-
-            if check_password(password, AccountInfo.password):
-                if AccountInfo.status == 'O':
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        except:
-            return False
-
     def post(self, request):
-        if not checkRecaptcha(request.data['g-recaptcha-response']):
-            return Response("fail.", status=HTTP_400_BAD_REQUEST)
+        if not is_recaptcha_correct(request.data['g-recaptcha-response']):
+            return Response("FAIL.", status=HTTP_400_BAD_REQUEST)
 
         username = request.data['username']
         password = request.data['password']
-
-        if self.authenticateAccount(username=username, password=password):
-            url = "http://localhost:8000/api/token/"
-            r = requests.post(url, data={'username': username, 'password': password})
-            if not r.json()['token']:
-                return Response('fail', status=HTTP_400_BAD_REQUEST)
-            else:
-                token = r.json()['token']
+        AccountInfo = UserAccount(username, password)
+        if AccountInfo.is_password_correct():
+            tk = Token(None)
+            token = tk.get_account_token(username, password)
+            if token is not None:
                 return Response({'token': token}, status=HTTP_200_OK)
+            else:
+                return Response(status=HTTP_400_BAD_REQUEST)
         else:
-            return Response('fail.', status=HTTP_400_BAD_REQUEST)
-
-        return Response('failed', status=HTTP_400_BAD_REQUEST)
+            return Response(status=HTTP_400_BAD_REQUEST)
 
 
 '''
@@ -253,8 +241,14 @@ class FoodList(APIView):
         except:
             return Response('fail', status=HTTP_400_BAD_REQUEST)
 
+
+
 """
-get : 이 주간 먹은 메뉴 개수 리턴
+GET : user/apis.py -> get_user_foodcount (/api/food/user/<str:username>)
+용도  : 특정 기간내에 특정 음식을 몇 번 먹었는지 정보 가져옴
+
+POST : food/apis.py -> get_user_food (/api/food/user/<str:username>) with post_data['foodname']
+용도 : 특정 음식을 아침/점심/저녁에 각각 몇 번 먹었는지에 대한 정보 가져옴
 """
 class UserDailyFoodList(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
@@ -264,145 +258,54 @@ class UserDailyFoodList(APIView):
     def get(self, request, username):
         if not username:
             return Response(HTTP_400_BAD_REQUEST)
-        try:
-            data = DailyUserFood.objects.filter(username=username, date__range=[datetime.date.today() - datetime.timedelta(days=9), datetime.date.today()])
-            if not data.exists():
-                return Response('no info', HTTP_400_BAD_REQUEST)
-            else:
-                res = dict()
-                foodcount = dict()
-                dateinfo = dict()
-                for row in data:
 
-                    if not row.food in foodcount:
-                        foodcount[row.food] = 1
-                    else:
-                        foodcount[row.food] +=1
+        UserFood = DailyFood(username)
+        foodlist = UserFood.get_user_food_with_day(9)
 
-                    if not str(row.date) in dateinfo:
-                        dateinfo[str(row.date)] = dict()
-                        dateinfo[str(row.date)][row.mealkind] = row.food
-
-                    else:
-                        dateinfo[str(row.date)][row.mealkind] = row.food
-
-                res['foodcount'] = foodcount
-                res['dateinfo'] = sorted(dateinfo.items())
-                json_res = json.dumps(res)
-                return Response(json_res, HTTP_200_OK)
-        except:
+        if not foodlist.exists():
             return Response(HTTP_400_BAD_REQUEST)
+
+        else:
+            res = UserFood.get_foodcount_with_date()
+            return Response(res, HTTP_200_OK)
 
     def post(self, request, username):
         if not username:
             return Response(HTTP_400_BAD_REQUEST)
         if not request.POST.get('foodname'):
-            return Response(status=HTTP_400_BAD_REQUEST)
-        try:
-            data = DailyUserFood.objects.filter(username=username, food=request.data['foodname'])
-            if not data.exists():
-                return Response(HTTP_400_BAD_REQUEST)
-            else:
-                res = dict()
-                for row in data:
-                    if not row.mealkind in res:
-                        res[row.mealkind] = 1
-                    else:
-                        res[row.mealkind] += 1
-                    json_res = json.dumps(res)
-                return Response(json_res, HTTP_200_OK)
-        except:
             return Response(HTTP_400_BAD_REQUEST)
 
-'''
-get : user의 추천 음식 리스트 생성
-'''
+        UserFood = DailyFood(username)
+        foodlist = UserFood.get_user_food(request.data['foodname'])
+
+        if not foodlist.exists():
+            return Response(HTTP_400_BAD_REQUEST)
+
+        else:
+            res = UserFood.get_user_food_mealkind()
+            return Response(res, HTTP_200_OK)
+
+
+"""
+GET : user/apis.py -> get_user_preference (/api/food/preference/<str:username>)
+용도  : 특정 기간 내의 사용자의 음식 리스트를 조회하여 추천 메뉴 7개를 선정함
+"""
 class UserFoodPreferenceList(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
     authentication_classes = (BasicAuthentication,)
     permission_classes = (AllowAny,)
 
     def get(self, request, username):
-        try:
-            data = DailyUserFood.objects.filter(username=username, date__range=[datetime.date.today() - datetime.timedelta(days=9), datetime.date.today()])
-            if not data.exists():
-                return Response('no info', HTTP_400_BAD_REQUEST)
-            else:
-                res = dict()
-                mostpick = dict()
-                categories = dict()
-                ingredients = dict()
-                countries = dict()
+        UserFood = DailyFood(username)
+        foodlist = UserFood.get_user_food_with_day(9)
 
-                count = 0
-                taste = 0
-                for row in data:
-                    foodname = row.food
-                    foodname_based_data = Food.objects.get(menuname=foodname)
-                    taste += int(foodname_based_data.taste)
-
-                    if not foodname_based_data.menuname in mostpick:
-                        mostpick[foodname_based_data.menuname] = 1
-                    else:
-                        mostpick[foodname_based_data.menuname] += 1
-
-                    if not foodname_based_data.ingredient in ingredients:
-                        ingredients[foodname_based_data.ingredient] = 1
-                    else:
-                        ingredients[foodname_based_data.ingredient] += 1
-
-                    if not foodname_based_data.category in categories:
-                        categories[foodname_based_data.category] = 1
-                    else:
-                        categories[foodname_based_data.category] += 1
-
-                    if not foodname_based_data.country in countries:
-                        countries[foodname_based_data.country] = 1
-                    else:
-                        countries[foodname_based_data.country] += 1
-
-                    count += 1
-
-                taste = int(taste/count)
-                mostpick = sorted(mostpick.items(), key=operator.itemgetter(1), reverse=True)
-                ingredients = sorted(ingredients.items(), key=operator.itemgetter(1), reverse=True)
-                categories = sorted(categories.items(), key=operator.itemgetter(1), reverse=True)
-                countries = sorted(countries.items(), key=operator.itemgetter(1), reverse=True)
-
-                res['모스트 원픽'] = Food.objects.filter(menuname=mostpick[0][0]).order_by("?").first().menuname
-
-                tmp = Food.objects.filter(taste=taste).order_by("?").first().menuname
-                while tmp in res.values():
-                    tmp = Food.objects.filter(taste=taste).order_by("?").first().menuname
-                res['평균적인 맛에 의거한 추천'] = tmp
-
-                tmp = Food.objects.filter(ingredient=ingredients[0][0]).order_by("?").first().menuname
-                while tmp in res.values():
-                    tmp = Food.objects.filter(ingredient=ingredients[0][0]).order_by("?").first().menuname
-                res['재료에 의한 추천'] = tmp
-
-                tmp = Food.objects.filter(category=categories[0][0]).order_by("?").first().menuname
-                while tmp in res.values():
-                    tmp = Food.objects.filter(category=categories[0][0]).order_by("?").first().menuname
-                res['음식의 종류에 따른 추천'] = tmp
-
-                tmp = Food.objects.filter(country=countries[0][0]).order_by("?").first().menuname
-                while tmp in res.values():
-                    tmp = Food.objects.filter(country=countries[0][0]).order_by("?").first().menuname
-                res['특정 나라음식 추천'] = tmp
-
-                tmp = Food.objects.order_by("?").first().menuname
-                while tmp in res.values():
-                    tmp = Food.objects.order_by("?").first().menuname
-                res['랜덤 추천'] = tmp
-
-                tmp = Food.objects.order_by("?").first().menuname
-                while tmp in res.values():
-                    tmp = Food.objects.order_by("?").first().menuname
-                res['묻지마 추천'] = tmp
-                return Response(res, HTTP_200_OK)
-        except:
+        if not foodlist.exists():
             return Response(HTTP_400_BAD_REQUEST)
+
+        else:
+            res = UserFood.get_preference()
+            return Response(res, HTTP_200_OK)
+
 
 '''
 get : 특정 일자의 유저의 아침/점심/저녁 리스트 리턴

@@ -20,7 +20,7 @@ class APIAboutUser:
         url = "http://localhost:8000/api/accounts/profile/"
         r = requests.get(url + self.username)
         if r.status_code == 200:
-            res = json.loads(r.json())
+            res = r.json()
         else:
             res = None
         return res
