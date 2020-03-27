@@ -5,9 +5,9 @@ from user.forms import AccountForm
 from django.http import Http404, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import AccountSerializer
+from .serializers import AccountSerializer, CommentSerializer
 from user.models import Account
-from food.models import Food, DailyUserFood
+from food.models import Food, DailyUserFood, FoodComment
 from eatenAway.settings import GOOGLE_RECAPTCHA_SECRET_KEY
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -455,3 +455,25 @@ class UserFoodByDate(APIView):
             return Response(HTTP_200_OK)
         except:
             return Response(HTTP_400_BAD_REQUEST)
+
+'''
+get : 음식에 대한 List 
+
+'''
+class FoodCommentList(APIView):
+    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
+    authentication_classes = (BasicAuthentication,)
+    permission_classes = (AllowAny,)
+    serializer_class = CommentSerializer
+
+    def get(self, request, foodname):
+        food = Food.objects.get(menuname=foodname)
+        data = FoodComment.objects.select_related('food').filter(food=food, parent=None)
+
+        # serialized = self.get_serializer(data, many=True)
+        serialized = CommentSerializer(data, many=True)
+
+        # for row in data:
+        #     print(row)
+        # FoodComment.objects.filter(food=food)
+        return Response(serialized.data, HTTP_200_OK)

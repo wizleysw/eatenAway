@@ -32,7 +32,6 @@ def menuDetail(request, foodname):
                 return redirect('/user/main/')
             menu = r.json()
 
-            url = "http://localhost:8000/food/user/"
             return render(request, 'foodmenu.html', {'username':jwt_value['username'], 'menu': menu, 'chart': chart, 'user_profile':user_profile})
 
     else:
@@ -81,7 +80,7 @@ def updateDateMenu(request):
 
             r = requests.get(url + jwt_value['username'] + '/' + request.POST['date'])
             dateres = r.json()
-            if not r.status_code == 200:
+            if r.status_code != 200 and request.POST['foodname'] != '삭제':
                 msg = '정보를 다시 확인해주세요.'
 
             return render(request, 'updatedatemenu.html', {'msg':msg, 'date':request.POST['date'], 'Breakfast':dateres['B'], 'Lunch':dateres['L'], 'Dinner':dateres['D']})

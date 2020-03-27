@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from user.models import Account
+from food.models import FoodComment
 
 class AccountSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
@@ -26,6 +27,7 @@ class AccountSerializer(serializers.ModelSerializer):
            return False
         return True
 
+
 class LoginSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -35,3 +37,9 @@ class LoginSerializer(serializers.ModelSerializer):
         def validate_account(self, value):
             pass
 
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FoodComment
+        fields = '__all__'

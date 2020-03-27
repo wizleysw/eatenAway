@@ -1,4 +1,5 @@
 from django.db import models
+from user.models import Account
 
 
 class Food(models.Model):
@@ -33,4 +34,16 @@ class DailyUserFood(models.Model):
 
     def __str__(self):
         return self.username + ':' + str(self.date) + ':' + self.mealkind
+
+
+class FoodComment(models.Model):
+    username = models.ForeignKey(Account, verbose_name='유저', on_delete=models.CASCADE)
+    food = models.ForeignKey(Food, verbose_name='메뉴', on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    body = models.CharField(max_length=30)
+    star = models.IntegerField(default=5)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.food.menuname + ':' + self.username.username
 
