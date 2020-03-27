@@ -1,21 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from .api import APIWithUsername
+from .apis import APIAboutUser
 from .tokens import Token
-import requests
-
-
-def checkTokenVerification(request):
-    if (request.COOKIES.get('token')):
-        url = "http://localhost:8000/api/token/verify/"
-        r = requests.post(url, data={'token': request.COOKIES.get('token')})
-        if r.status_code == 400:
-            return False
-        if not r.json()['token']:
-            return False
-        else:
-            return True
-    return False
 
 
 def RenderIntroPage(request):
@@ -27,7 +13,7 @@ def RenderMainPage(request):
     tk_jwt_value = tk.decode_jwt()
     if tk_jwt_value is not None:
         username = tk_jwt_value['username']
-        user_api = APIWithUsername(tk_jwt_value['username'])
+        user_api = APIAboutUser(tk_jwt_value['username'])
         user_profile = user_api.get_user_profile()
         choice = user_api.get_user_preference()
         date_info, food_count = user_api.get_user_foodcount()
@@ -47,7 +33,7 @@ def RenderLoginPage(request):
         password = request.POST['password']
         recaptcha = request.POST['g-recaptcha-response']
 
-        user_api = APIWithUsername(username)
+        user_api = APIAboutUser(username)
         token = user_api.get_user_token(password, recaptcha)
 
         if token is not None:

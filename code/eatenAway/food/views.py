@@ -1,86 +1,74 @@
 from django.shortcuts import render, redirect
-import requests
-from .models import Food
-from eatenAway.settings import JWT_AUTH
-import jwt, json
-from user.views import checkTokenVerification
+from django.http import HttpResponseRedirect
+from user.apis import APIAboutUser
+from user.tokens import Token
+from .apis import APIAboutFood
 
-def menuDetail(request, foodname):
-    if (request.COOKIES.get('token')):
-        if checkTokenVerification(request):
-            jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
-            url = "http://localhost:8000/api/food/user/"
-            r = requests.post(url+jwt_value['username'], data={'foodname': foodname})
-            try:
-                chart = json.loads(r.json())
-            except:
-                chart = {'nope':1}
 
-            try:
-                url = "http://localhost:8000/api/accounts/profile/"
-                r = requests.get(url+jwt_value['username'])
-                if r.status_code != 200:
-                    user_profile = None
-                else:
-                    user_profile = json.loads(r.json())
-            except:
-                user_profile = None
-
-            url = "http://localhost:8000/api/food/"
-            r = requests.get(url + foodname)
-            if not r.status_code == 200:
-                return redirect('/user/main/')
-            menu = r.json()
-
-            return render(request, 'foodmenu.html', {'username':jwt_value['username'], 'menu': menu, 'chart': chart, 'user_profile':user_profile})
-
+def RenderFoodPage(request, foodname):
+    tk = Token(request.COOKIES.get('token'))
+    tk_jwt_value = tk.decode_jwt()
+    if tk_jwt_value is not None:
+        username = tk_jwt_value['username']
+        food_api = APIAboutFood(username, foodname)
+        user_api = APIAboutUser(username)
+        chart = food_api.get_user_food()
+        user_profile = user_api.get_user_profile()
+        menu = food_api.get_food_detail()
+        return render(request, 'foodmenu.html',
+                      {'username': username, 'menu': menu, 'chart': chart, 'user_profile': user_profile})
     else:
-        return redirect('/user/intro/')
+        response = HttpResponseRedirect('/user/login')
+        response.delete_cookie('token')
+        return response
 
 
-def addMenu(request):
-    if(request.COOKIES.get('token')):
-        if checkTokenVerification(request):
-            return render(request, 'addmenu.html', {})
+def RenderAddMenuPage(request):
+    tk = Token(request.COOKIES.get('token'))
+    tk_jwt_value = tk.decode_jwt()
+    if tk_jwt_value is not None:
+        return render(request, 'addmenu.html', {})
     else:
-        return redirect('/user/intro')
+        return redirect('/user/login')
 
 
-def checkDateMenu(request):
+def RenderCheckMenuByDatePage(request):
+    if not request.POST:
+        return redirect('/user/login')
+    else:
+        tk = Token(request.COOKIES.get('token'))
+        tk_jwt_value = tk.decode_jwt()
+        if tk_jwt_value is not None:
+            username = tk_jwt_value['username']
+            date = request.POST['date']
+            food_api = APIAboutFood(username, None)
+            dateres = food_api.get_user_food_by_date(date)
+            return render(request, 'checkdatemenu.html',
+                          {'username': username, 'date': date, 'Breakfast': dateres['B'],
+                           'Lunch': dateres['L'], 'Dinner': dateres['D']})
+        else:
+            return redirect('/user/login')
+
+
+def RenderUpdateMenuByDatePage(request):
     if not request.POST:
         return redirect('/user/intro')
-
-    if(request.COOKIES.get('token')):
-        if checkTokenVerification(request):
-            jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
-            url = "http://localhost:8000/api/food/date/"
-            r = requests.get(url + jwt_value['username'] + '/' + request.POST['date'])
-            dateres = r.json()
-            return render(request, 'checkdatemenu.html', {'username':jwt_value['username'], 'date':request.POST['date'], 'Breakfast':dateres['B'], 'Lunch':dateres['L'], 'Dinner':dateres['D']})
     else:
-        return redirect('/user/intro')
+        tk = Token(request.COOKIES.get('token'))
+        tk_jwt_value = tk.decode_jwt()
+        if tk_jwt_value is not None:
+            username = tk_jwt_value['username']
+            date = request.POST['date']
+            mealkind = request.POST['mealkind']
+            food_api = APIAboutFood(username, None)
 
-
-def updateDateMenu(request):
-    if not request.POST:
-        return redirect('/user/intro')
-
-    if(request.COOKIES.get('token')):
-        if checkTokenVerification(request):
-            jwt_value = jwt.decode(request.COOKIES.get('token'), JWT_AUTH['JWT_SECRET_KEY'])
-            url = "http://localhost:8000/api/food/date/"
             if request.POST['foodname'] == '삭제':
-                r = requests.delete(url + jwt_value['username'] + '/' + request.POST['date'] + '/' + request.POST['mealkind'])
+                msg = food_api.delete_user_food_by_date(date, mealkind)
             else:
-                r = requests.post(url + jwt_value['username'], data=request.POST)
-            if r.status_code == 200 or r.status_code == 201:
-                msg = '요청이 정상적으로 반영되었습니다.'
-            else:
-                msg = '정보를 다시 확인해주세요.'
+                msg = food_api.update_user_food_by_date(request.POST)
 
-            r = requests.get(url + jwt_value['username'] + '/' + request.POST['date'])
-            dateres = r.json()
-            if r.status_code != 200 and request.POST['foodname'] != '삭제':
-                msg = '정보를 다시 확인해주세요.'
+            dateres = food_api.get_user_food_by_date(date)
+            return render(request, 'updatedatemenu.html',
+                          {'msg': msg, 'date': request.POST['date'], 'Breakfast': dateres['B'], 'Lunch': dateres['L'],
+                           'Dinner': dateres['D']})
 
-            return render(request, 'updatedatemenu.html', {'msg':msg, 'date':request.POST['date'], 'Breakfast':dateres['B'], 'Lunch':dateres['L'], 'Dinner':dateres['D']})
