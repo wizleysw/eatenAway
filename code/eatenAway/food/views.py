@@ -10,8 +10,8 @@ def RenderFoodPage(request, foodname):
     tk_jwt_value = tk.decode_jwt()
     if tk_jwt_value is not None:
         username = tk_jwt_value['username']
-        food_api = APIAboutFood(username, foodname)
-        user_api = APIAboutUser(username)
+        food_api = APIAboutFood(username, foodname, tk.token)
+        user_api = APIAboutUser(username, tk)
         chart = food_api.get_user_food()
         user_profile = user_api.get_user_profile()
         menu = food_api.get_food_detail()
@@ -41,7 +41,7 @@ def RenderCheckMenuByDatePage(request):
         if tk_jwt_value is not None:
             username = tk_jwt_value['username']
             date = request.POST['date']
-            food_api = APIAboutFood(username, None)
+            food_api = APIAboutFood(username, None, tk.token)
             dateres = food_api.get_user_food_by_date(date)
             return render(request, 'checkdatemenu.html',
                           {'username': username, 'date': date, 'Breakfast': dateres['B'],
@@ -60,7 +60,7 @@ def RenderUpdateMenuByDatePage(request):
             username = tk_jwt_value['username']
             date = request.POST['date']
             mealkind = request.POST['mealkind']
-            food_api = APIAboutFood(username, None)
+            food_api = APIAboutFood(username, None, tk.token)
 
             if request.POST['foodname'] == '삭제':
                 msg = food_api.delete_user_food_by_date(date, mealkind)

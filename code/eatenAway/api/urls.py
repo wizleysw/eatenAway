@@ -18,7 +18,6 @@ urlpatterns = [
     path('food/<str:foodname>', views.APIForFoodDetail.as_view()),
     path('food/user/<str:username>', views.APIForUserFoodDetail.as_view()),
     path('food/preference/<str:username>', views.APIForUserFoodChoice.as_view()),
-    # path('food/<str:foodname>/comment', views.APIForFoodComment.as_view()),
 
     path('food/date/<str:username>/<str:date>', views.APIForUserFoodDetailByDate.as_view()),
     path('food/date/<str:username>', views.APIForUserFoodDetailByDate.as_view()),

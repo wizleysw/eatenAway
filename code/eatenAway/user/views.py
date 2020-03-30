@@ -13,7 +13,7 @@ def RenderMainPage(request):
     tk_jwt_value = tk.decode_jwt()
     if tk_jwt_value is not None:
         username = tk_jwt_value['username']
-        user_api = APIAboutUser(tk_jwt_value['username'])
+        user_api = APIAboutUser(tk_jwt_value['username'], tk.token)
         user_profile = user_api.get_user_profile()
         choice = user_api.get_user_preference()
         date_info, food_count = user_api.get_user_foodcount()
@@ -33,7 +33,7 @@ def RenderLoginPage(request):
         password = request.POST['password']
         recaptcha = request.POST['g-recaptcha-response']
 
-        user_api = APIAboutUser(username)
+        user_api = APIAboutUser(username, request.COOKIES.get('token'))
         token = user_api.get_user_token(password, recaptcha)
 
         if token is not None:

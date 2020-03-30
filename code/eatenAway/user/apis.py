@@ -4,8 +4,9 @@ import json
 
 
 class APIAboutUser:
-    def __init__(self, username):
+    def __init__(self, username, token):
         self.username = username
+        self.token = token
 
     def get_user_token(self, password, recaptcha):
         url = "http://localhost:8000/api/accounts/login/"
@@ -18,7 +19,7 @@ class APIAboutUser:
 
     def get_user_profile(self):
         url = "http://localhost:8000/api/accounts/profile/"
-        r = requests.get(url + self.username)
+        r = requests.get(url + self.username, headers={'Authorization': 'JWT ' + self.token})
         if r.status_code == 200:
             res = r.json()
         else:
@@ -27,7 +28,7 @@ class APIAboutUser:
 
     def get_user_preference(self):
         url = "http://localhost:8000/api/food/preference/"
-        r = requests.get(url + self.username)
+        r = requests.get(url + self.username, headers={'Authorization': 'JWT ' + self.token})
         if r.status_code == 200:
             res = r.json()
         else:
@@ -36,8 +37,9 @@ class APIAboutUser:
 
     def get_user_foodcount(self):
         url = "http://localhost:8000/api/food/user/"
-        r = requests.get(url + self.username)
+        r = requests.get(url + self.username, headers={'Authorization': 'JWT ' + self.token})
         if r.status_code == 200:
+            print(r.json())
             res = json.loads(r.json())
             if res is not None:
                 res2 = res['dateinfo']

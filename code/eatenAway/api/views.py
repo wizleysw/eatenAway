@@ -1,11 +1,11 @@
-from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK
+from .serializers import AccountProfileSerializer, FoodSerializer
 from rest_framework.permissions import AllowAny
 from user.forms import AccountForm
 from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import AccountProfileSerializer, FoodSerializer
 from django.shortcuts import render
 from user.tokens import Token
 from .recaptchas import is_recaptcha_correct
@@ -74,7 +74,6 @@ GET : (/api/activate/<str:uidb64>/<str:token>)
 용도 : 회원가입시 전송되는 이메일을 통해 계정 활성화 여부 결정
 """
 class APIForEmailActivation(APIView):
-    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
     authentication_classes = (BasicAuthentication,)
     permission_classes = (AllowAny,)
 
@@ -90,10 +89,6 @@ GET : user/apis.py -> get_user_profile (/api/accounts/profile/<str:username>)
 용도  : 토큰의 사용자 아이디 정보로 프로파일 정보 가져옴
 """
 class APIForAccountProfile(APIView):
-    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
-    authentication_classes = (BasicAuthentication,)
-    permission_classes = (AllowAny,)
-    serializer_class = AccountProfileSerializer
 
     def get(self, request, username):
         AccountInfo = UserAccount(username, None)
@@ -109,8 +104,6 @@ POST : user/apis.py -> get_user_token (/api/accounts/login/)
 용도  : 사용자 아이디 패스워드 검증 후 token 발급 
 """
 class APIForAccountAuthentication(APIView):
-    authentication_classes = (BasicAuthentication,)
-    permission_classes = (AllowAny,)
 
     def post(self, request):
         if not is_recaptcha_correct(request.data['g-recaptcha-response']):
@@ -138,9 +131,6 @@ GET : food/apis.py -> get_food_detail (/api/food/<str:foodname>) with POST_DATA[
 용도 : 특정 음식에 대한 세부 정보를 가져옴
 """
 class APIForFoodDetail(APIView):
-    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
-    authentication_classes = (BasicAuthentication,)
-    permission_classes = (AllowAny,)
 
     def get(self, request, foodname):
         if not foodname:
@@ -174,9 +164,6 @@ POST : food/apis.py -> get_user_food (/api/food/user/<str:username>) with post_d
 용도 : 특정 음식을 아침/점심/저녁에 각각 몇 번 먹었는지에 대한 정보 가져옴
 """
 class APIForUserFoodDetail(APIView):
-    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
-    authentication_classes = (BasicAuthentication,)
-    permission_classes = (AllowAny,)
 
     def get(self, request, username):
         if not username:
@@ -214,9 +201,6 @@ GET : user/apis.py -> get_user_preference (/api/food/preference/<str:username>)
 용도  : 특정 기간 내의 사용자의 음식 리스트를 조회하여 추천 메뉴 7개를 선정함
 """
 class APIForUserFoodChoice(APIView):
-    # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
-    authentication_classes = (BasicAuthentication,)
-    permission_classes = (AllowAny,)
 
     def get(self, request, username):
         UserFood = DailyFood(username)
@@ -242,7 +226,7 @@ DELETE : food/apis.py -> delete_user_food_by_date (/api/food/date/<str:username>
 """
 class APIForUserFoodDetailByDate(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
-    authentication_classes = (BasicAuthentication,)
+    authentication_classes = ()
     permission_classes = (AllowAny,)
 
     def get(self, request, username, date):
@@ -285,24 +269,3 @@ class APIForUserFoodDetailByDate(APIView):
         except:
             return Response(status=HTTP_400_BAD_REQUEST)
 
-# '''
-# GET : None
-# 용도 : 특정 메뉴에 대한 사용자들의 댓글 정보를 가져옴
-# '''
-# class APIForFoodComment(APIView):
-#     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
-#     authentication_classes = (BasicAuthentication,)
-#     permission_classes = (AllowAny,)
-#     serializer_class = CommentSerializer
-#
-#     def get(self, request, foodname):
-#         food = Food.objects.get(menuname=foodname)
-#         data = FoodComment.objects.select_related('food').filter(food=food, parent=None)
-#
-#         # serialized = self.get_serializer(data, many=True)
-#         serialized = CommentSerializer(data, many=True)
-#
-#         # for row in data:
-#         #     print(row)
-#         # FoodComment.objects.filter(food=food)
-#         return Response(serialized.data, HTTP_200_OK)
