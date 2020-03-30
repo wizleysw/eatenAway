@@ -56,6 +56,11 @@ def RenderLoginPage(request):
         else:
             return render(request, 'login.html', {})
 
+def RenderLogoutPage(request):
+    response = HttpResponseRedirect('/user/intro')
+    response.delete_cookie('token')
+    return response
+
 
 def RenderSignupPage(request):
     return render(request, 'signup.html', {})

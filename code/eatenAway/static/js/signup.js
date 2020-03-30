@@ -105,14 +105,14 @@ function lastCheck(){
             data : queryString,
             dataType : 'json',
             async: false,
+            success: function(xhr, status, success){
+                alert('회원가입 신청이 완료되었습니다.');
+                flag = true;
+            },
             error: function(xhr, status, error){
                 alert('정보를 다시 확인해주세요.');
                 grecaptcha.reset();
                 flag = false;
-            },
-            success: function(xhr){
-                alert('회원가입 신청이 완료되었습니다.');
-                flag = true;
             },
         });
 
