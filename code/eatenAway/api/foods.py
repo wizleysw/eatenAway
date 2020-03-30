@@ -1,4 +1,4 @@
-from food.models import Food, DailyUserFood, FoodComment
+from food.models import Food, DailyUserFood
 import operator
 import datetime
 import json
@@ -18,7 +18,7 @@ class DailyFood:
         self.res = dict()
 
     def get_food_info(self, menuname):
-        res = Food.objects.get(menuname = menuname)
+        res = Food.objects.get(menuname=menuname)
         return res
 
     def get_average_of_taste(self, food):
@@ -83,6 +83,21 @@ class DailyFood:
             tmp = Food.objects.order_by("?").first().menuname
         self.res['묻지마 추천'] = tmp
 
+    def get_user_food_by_date(self, date):
+        self.queryset = DailyUserFood.objects.filter(username=self.username, date=date)
+        self.res = {}
+        self.res['B'] = self.res['L'] = self.res['D'] = '-'
+        if not self.queryset.exists():
+            return self.res
+        else:
+            for row in self.queryset:
+                self.res[row.mealkind] = row.food
+            return self.res
+
+    def get_user_food_by_date_and_mealkind(self, date, mealkind):
+        res = DailyUserFood.objects.get(username=self.username, date=date, mealkind=mealkind)
+        return res
+
     def get_user_food(self, foodname):
         self.queryset = DailyUserFood.objects.filter(username=self.username, food=foodname)
         return self.queryset
@@ -123,5 +138,11 @@ class DailyFood:
         self.res['dateinfo'] = self.dateinfo
         return json.dumps(self.res)
 
+    def add_user_food(self, foodname, mealkind, date):
+        res = DailyUserFood(username=self.username, food=foodname, date=date, mealkind=mealkind)
+        res.save()
 
+    def delete_user_food(self, date, mealkind):
+        res = DailyUserFood.objects.get(username=self.username, date=date, mealkind=mealkind)
+        res.delete()
 

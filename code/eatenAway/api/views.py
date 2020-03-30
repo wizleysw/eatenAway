@@ -5,7 +5,7 @@ from user.forms import AccountForm
 from django.http import Http404, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import AccountSerializer, CommentSerializer, AccountProfileSerializer
+from .serializers import AccountSerializer, CommentSerializer, AccountProfileSerializer, FoodSerializer
 from user.models import Account
 from food.models import Food, DailyUserFood, FoodComment
 from eatenAway.settings import GOOGLE_RECAPTCHA_SECRET_KEY
@@ -204,10 +204,13 @@ class AccountAuthentication(APIView):
             return Response(status=HTTP_400_BAD_REQUEST)
 
 
-'''
-get : 음식 정보
-post : 음식 사진 정보
-'''
+"""
+POST : user/apis.py -> None (/api/food/)
+용도  : 특정 음식에 대한 이미지 정보를 가져옴
+
+GET : food/apis.py -> get_food_detail (/api/food/<str:foodname>) with POST_DATA['foodname']
+용도 : 특정 음식에 대한 세부 정보를 가져옴
+"""
 class FoodList(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
     authentication_classes = (BasicAuthentication,)
@@ -216,21 +219,14 @@ class FoodList(APIView):
     def get(self, request, foodname):
         if not foodname:
             return Response(status=HTTP_400_BAD_REQUEST)
+        UserFood = DailyFood(None)
         try:
-            menu = Food.objects.get(menuname=foodname)
-            data = {
-                'menuname': menu.menuname,
-                'category': menu.category,
-                'country': menu.country,
-                'taste': menu.taste,
-                'stock': menu.stock,
-                'description': menu.description
-                # 'profile': menu.profile
-            }
-            return Response(data, status=HTTP_200_OK)
+            res = UserFood.get_food_info(foodname)
+            serialized = FoodSerializer(res)
+            return Response(serialized.data, status=HTTP_200_OK)
 
         except:
-            return Response('fail', status=HTTP_400_BAD_REQUEST)
+            return Response(status=HTTP_400_BAD_REQUEST)
 
     def post(self, request):
         if not request.data['foodname']:
@@ -238,6 +234,7 @@ class FoodList(APIView):
         try:
             img = Food.objects.get(menuname=request.data['foodname']).profile
             return HttpResponse(img, content_type='*/*', status=HTTP_200_OK)
+
         except:
             return Response('fail', status=HTTP_400_BAD_REQUEST)
 
@@ -307,61 +304,64 @@ class UserFoodPreferenceList(APIView):
             return Response(res, HTTP_200_OK)
 
 
-'''
-get : 특정 일자의 유저의 아침/점심/저녁 리스트 리턴
-post : 특정 일자의 아침/점심/저녁 정보 추가 또는 업데이트 및 삭제
-'''
+"""
+GET : food/apis.py -> get_user_food_by_date (/api/food/<str:username>/<str:date>)
+용도 : 특정 기간 정보를 토대로 사용자의 아침/점심/저녁 리스트를 조회하여 돌려줌
+
+POST : food/apis.py -> update_user_food_by_date (/api/food/<str:username>) with POST_DATA[date, mealkind, foodname]
+용도 : 특정 기간 정보를 토대로 사용자의 아침/점심/저녁 리스트를 업데이트함
+
+DELETE : food/apis.py -> delete_user_food_by_date (/api/food/date/<str:username>/<str:date>/<str:mealkind>') 
+용도 : 특정 기간 정보를 토대로 사용자의 아침/점심/저녁 리스트를 삭제함
+"""
 class UserFoodByDate(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN
     authentication_classes = (BasicAuthentication,)
     permission_classes = (AllowAny,)
 
     def get(self, request, username, date):
-        data = DailyUserFood.objects.filter(username=username, date=date)
-        res = {}
-        res['B'] = res['L'] = res['D'] = '-'
-        if not data.exists():
-            return Response(res, HTTP_400_BAD_REQUEST)
-        else:
-            for row in data:
-                res[row.mealkind] = row.food
-            return Response(res, HTTP_200_OK)
-
+        UserFood = DailyFood(username)
+        foodlist = UserFood.get_user_food_by_date(date)
+        return Response(foodlist, HTTP_200_OK)
 
     def post(self, request, username):
+        UserFood = DailyFood(username)
+
+        date = request.data['date']
+        mealkind = request.data['mealkind']
+        foodname = request.data['foodname']
+
         try:
-            date = request.data['date']
-            mealkind = request.data['mealkind']
-            foodname = request.data['foodname']
-            food_data = Food.objects.get(menuname=foodname)
-            mealkind_choice = ['B', 'L', 'D']
-            if not mealkind in mealkind_choice:
-                return Response(HTTP_400_BAD_REQUEST)
+            foodinfo = UserFood.get_food_info(foodname)
+
         except:
             return Response(HTTP_400_BAD_REQUEST)
+
+        mealkind_choice = ['B', 'L', 'D']
+        if not mealkind in mealkind_choice:
+            return Response(HTTP_400_BAD_REQUEST)
+
         try:
-            data = DailyUserFood.objects.get(username=username, date=date, mealkind=mealkind)
-            data.food = foodname
-            data.save()
-            return Response(HTTP_201_CREATED)
+            res = UserFood.get_user_food_by_date_and_mealkind(date, mealkind)
+            res.food = foodname
+            res.save()
+            return Response(HTTP_200_OK)
 
-        except DailyUserFood.DoesNotExist:
-            data = DailyUserFood(username=username, food=foodname, mealkind=mealkind, date=date)
-            data.save()
+        except:
+            UserFood.add_user_food(foodname, mealkind, date)
             return Response(HTTP_201_CREATED)
-
 
     def delete(self, request, username, date, mealkind):
         try:
-            data = DailyUserFood.objects.get(username=username, date=date, mealkind=mealkind)
-            data.delete()
+            UserFood = DailyFood(username)
+            res = UserFood.delete_user_food(date, mealkind)
             return Response(HTTP_200_OK)
         except:
             return Response(HTTP_400_BAD_REQUEST)
 
 '''
-get : 음식에 대한 List 
-
+GET : None
+용도 : 특정 메뉴에 대한 사용자들의 댓글 정보를 가져옴
 '''
 class FoodCommentList(APIView):
     # FIXME : AUTHENTICATION, PERMISSION LEVEL TO TOKEN

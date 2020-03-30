@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from user.models import Account
-from food.models import FoodComment
+from food.models import Food, FoodComment
 
 class AccountSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
@@ -28,12 +28,18 @@ class AccountSerializer(serializers.ModelSerializer):
         return True
 
 
+class FoodSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Food
+        fields = ('menuname', 'category', 'country', 'taste', 'stock', 'description')
+
+
 class LoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
         fields = ('username', 'password')
-
 
 
 class CommentSerializer(serializers.ModelSerializer):
